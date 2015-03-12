@@ -22,9 +22,9 @@ import midas.domain.Customer;
 import midas.entity.CustomerEntity;
 import midas.repository.CustomerRepository;
 
-import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -37,8 +37,10 @@ public class CustomerController {
 	@Autowired
 	private CustomerRepository customerRepository;
 
-	private final Mapper mapper = new DozerBeanMapper();
-	
+	@Autowired
+	@Qualifier("customerMapper")
+	private Mapper mapper;
+
 	public Customer create(final Customer customer) {
 		CustomerEntity entity = mapToEntity(customer);
 		entity = customerRepository.save(entity);

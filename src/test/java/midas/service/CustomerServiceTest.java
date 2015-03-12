@@ -111,13 +111,13 @@ public class CustomerServiceTest {
 		created.setFirstName("Kyle");
 		Customer updated = customerService.update(id, created, true);
 
-		Assert.assertEquals(created.getId(), updated.getId());
+		Assert.assertEquals(id, updated.getId());
 		Assert.assertEquals("Kyle", updated.getFirstName());
 		Assert.assertEquals("Amaral", updated.getLastName());
 
-		Customer found = customerService.retrieve(created.getId());
+		Customer found = customerService.retrieve(id);
 
-		Assert.assertEquals(created.getId(), found.getId());
+		Assert.assertEquals(id, found.getId());
 		Assert.assertEquals("Kyle", found.getFirstName());
 		Assert.assertEquals("Amaral", found.getLastName());
 	}
@@ -167,6 +167,34 @@ public class CustomerServiceTest {
 		} catch (NotFoundException ex) {
 			// OK
 		}
+	}
+
+	@Test
+	public void testUpdateDontChangeId() {
+		Customer customer = new Customer();
+		customer.setFirstName("Caio");
+		customer.setLastName("Amaral");
+
+		Response response = customerService.create(customer, true);
+		Customer created = response.readEntity(Customer.class);
+
+		Integer id = created.getId();
+
+		Assert.assertNotNull(id);
+
+		created.setId(id + 100);
+		created.setFirstName("Kyle");
+		Customer updated = customerService.update(id, created, true);
+
+		Assert.assertEquals(id, updated.getId());
+		Assert.assertEquals("Kyle", updated.getFirstName());
+		Assert.assertEquals("Amaral", updated.getLastName());
+
+		Customer found = customerService.retrieve(id);
+
+		Assert.assertEquals(id, found.getId());
+		Assert.assertEquals("Kyle", found.getFirstName());
+		Assert.assertEquals("Amaral", found.getLastName());
 	}
 }
 
