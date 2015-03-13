@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-@Path("customer")
+@Path("customers")
 @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 public class CustomerService {
@@ -78,5 +78,29 @@ public class CustomerService {
 	@Path("{id}")
 	public Customer delete(@PathParam("id") final Integer id) {
 		return customerController.delete(id);
+	}
+
+	@GET
+	@Path("{id}/duplicates")
+	public Response retrieveDuplicates(@PathParam("id") final Integer id) {
+		return Response.serverError().build();
+	}
+	
+	@GET
+	@Path("/duplicates")
+	public Response retrieveAllDuplicates() {
+		return Response.serverError().build();
+	}
+
+	@POST
+	@Path("/duplicates/index")
+	public Response createIndex() {
+		return Response.serverError().build();
+	}
+
+	@GET
+	@Path("/duplicates/index")
+	public Response retriveIndex() {
+		return Response.serverError().build();
 	}
 }
