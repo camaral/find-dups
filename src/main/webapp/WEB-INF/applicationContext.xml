@@ -14,16 +14,5 @@
 	<context:annotation-config/>
 
 	<context:component-scan base-package="midas.configuration, midas.service, midas.controller"/>
-		
-	<jpa:repositories base-package="midas.repository.jpa" />
-
-	<bean id="entityManagerFactory"
-		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-		<property name="persistenceUnitName" value="test" />
-	</bean>
-
-	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory" ref="entityManagerFactory" />
-	</bean>
 
 </beans>
