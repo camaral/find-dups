@@ -20,14 +20,12 @@ import java.net.URISyntaxException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -51,12 +49,10 @@ public class CustomerService {
 	private CustomerController customerController;
 
 	@POST
-	public Response create(final Customer customer,
-			@QueryParam("reload") @DefaultValue("false") final boolean reload)
-			throws URISyntaxException {
+	public Response create(final Customer customer) throws URISyntaxException {
 		final Customer created = customerController.create(customer);
 
-		return Response.created(new URI("/customer/" + created.getId()))
+		return Response.created(new URI("/customers/" + created.getId()))
 				.entity(created).build();
 	}
 
@@ -69,8 +65,7 @@ public class CustomerService {
 	@PUT
 	@Path("{id}")
 	public Customer update(@PathParam("id") final Integer id,
-			final Customer customer,
-			@QueryParam("reload") @DefaultValue("false") final boolean reload) {
+			final Customer customer) {
 		return customerController.update(id, customer);
 	}
 
@@ -85,7 +80,7 @@ public class CustomerService {
 	public Response retrieveDuplicates(@PathParam("id") final Integer id) {
 		return Response.serverError().build();
 	}
-	
+
 	@GET
 	@Path("/duplicates")
 	public Response retrieveAllDuplicates() {

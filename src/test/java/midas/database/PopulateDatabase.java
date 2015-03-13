@@ -21,12 +21,17 @@ import midas.entity.jpa.CustomerJpa;
 import midas.entity.solr.CustomerSolr;
 import midas.repository.jpa.CustomerJpaRepository;
 import midas.repository.solr.CustomerSolrRepository;
+import midas.testcategory.TryOut;
 
 import org.dozer.Mapper;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -34,6 +39,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @author caio.amaral
  *
  */
+@Category(TryOut.class)
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:/WEB-INF/applicationContext.xml" })
 public class PopulateDatabase {
@@ -120,4 +126,12 @@ public class PopulateDatabase {
 		}
 	}
 
+	@Test
+	public void testA() {
+		Pageable page = new SolrPageRequest(0, 5);
+		Page<CustomerSolr> customers = customerSolrRepo.findMoreLikeThis("haygood sparkman", page);
+		for (CustomerSolr customerSolr : customers) {
+			System.out.println(customerSolr.getFirstName() +" " + customerSolr.getLastName());
+		}
+	}
 }

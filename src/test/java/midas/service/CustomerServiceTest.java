@@ -17,7 +17,6 @@ package midas.service;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -25,12 +24,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import midas.domain.Customer;
+import midas.testcategory.Integration;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -38,14 +37,16 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
- * This test expects that the server is up and running. TODO: Init the server
- * automatically
+ * This test expects that the server is up and running. In a jenkins pipeline,
+ * it would execute after the war was deployed at DEV/QA environment.
  * 
  * @author caio.amaral
  *
  */
+@Category(Integration.class)
 public class CustomerServiceTest {
 
 	private static CustomerServiceApi customerService;
@@ -65,7 +66,7 @@ public class CustomerServiceTest {
 		customer.setFirstName("caio");
 		customer.setLastName("amaral");
 
-		Response response = customerService.create(customer, true);
+		Response response = customerService.create(customer);
 
 		Assert.assertEquals(201, response.getStatus());
 		Assert.assertNotNull(response.getHeaderString(HttpHeaders.LOCATION));
@@ -83,7 +84,7 @@ public class CustomerServiceTest {
 		customer.setFirstName("Caio");
 		customer.setLastName("Amaral");
 
-		Response response = customerService.create(customer, true);
+		Response response = customerService.create(customer);
 		Customer created = response.readEntity(Customer.class);
 
 		Assert.assertNotNull(created.getId());
@@ -101,7 +102,7 @@ public class CustomerServiceTest {
 		customer.setFirstName("Caio");
 		customer.setLastName("Amaral");
 
-		Response response = customerService.create(customer, true);
+		Response response = customerService.create(customer);
 		Customer created = response.readEntity(Customer.class);
 
 		Integer id = created.getId();
@@ -109,7 +110,7 @@ public class CustomerServiceTest {
 		Assert.assertNotNull(id);
 
 		created.setFirstName("Kyle");
-		Customer updated = customerService.update(id, created, true);
+		Customer updated = customerService.update(id, created);
 
 		Assert.assertEquals(id, updated.getId());
 		Assert.assertEquals("Kyle", updated.getFirstName());
@@ -128,7 +129,7 @@ public class CustomerServiceTest {
 		customer.setFirstName("Caio");
 		customer.setLastName("Amaral");
 
-		Response response = customerService.create(customer, true);
+		Response response = customerService.create(customer);
 		Customer created = response.readEntity(Customer.class);
 
 		Integer id = created.getId();
@@ -162,7 +163,7 @@ public class CustomerServiceTest {
 	@Test
 	public void testUpdateNotFound() {
 		try {
-			customerService.update(-10, new Customer(), true);
+			customerService.update(-10, new Customer());
 			Assert.fail("Should have thrown NotFoundException");
 		} catch (NotFoundException ex) {
 			// OK
@@ -175,7 +176,7 @@ public class CustomerServiceTest {
 		customer.setFirstName("Caio");
 		customer.setLastName("Amaral");
 
-		Response response = customerService.create(customer, true);
+		Response response = customerService.create(customer);
 		Customer created = response.readEntity(Customer.class);
 
 		Integer id = created.getId();
@@ -184,7 +185,7 @@ public class CustomerServiceTest {
 
 		created.setId(id + 100);
 		created.setFirstName("Kyle");
-		Customer updated = customerService.update(id, created, true);
+		Customer updated = customerService.update(id, created);
 
 		Assert.assertEquals(id, updated.getId());
 		Assert.assertEquals("Kyle", updated.getFirstName());
@@ -204,8 +205,7 @@ public class CustomerServiceTest {
 interface CustomerServiceApi {
 
 	@POST
-	public Response create(final Customer customer,
-			@QueryParam("reload") @DefaultValue("false") final boolean reload);
+	public Response create(final Customer customer);
 
 	@GET
 	@Path("{id}")
@@ -214,8 +214,7 @@ interface CustomerServiceApi {
 	@PUT
 	@Path("{id}")
 	public Customer update(@PathParam("id") final Integer id,
-			final Customer customer,
-			@QueryParam("reload") @DefaultValue("false") final boolean reload);
+			final Customer customer);
 
 	@DELETE
 	@Path("{id}")

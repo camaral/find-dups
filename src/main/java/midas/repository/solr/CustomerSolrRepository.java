@@ -29,6 +29,9 @@ import org.springframework.data.solr.repository.SolrCrudRepository;
 public interface CustomerSolrRepository extends
 		SolrCrudRepository<CustomerSolr, Integer> {
 
-	@Query(value = "first_name_s:?0")
-	Page<CustomerSolr> findByNameAndFacetOnCategory(String name, Pageable page);
+	@Query(value = "?0&mlt.fl=last_name_s,first_name_s&mlt.mindf=1&mlt.mintf=1")
+	Page<CustomerSolr> findMoreLikeThis(String name, Pageable page);
+	
+	@Query(value = "?1 AND -id:?0&mlt.fl=last_name_s,first_name_s&mlt.mindf=1&mlt.mintf=1")
+	Page<CustomerSolr> findMoreLikeThis(Integer id, String name, Pageable page);
 }

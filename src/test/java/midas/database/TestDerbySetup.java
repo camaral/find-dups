@@ -21,18 +21,19 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 
 import midas.entity.jpa.CustomerJpa;
+import midas.testcategory.TryOut;
 
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * @author caio.amaral
  *
  */
+@Category(TryOut.class)
 public class TestDerbySetup {
 
 	@Test
-	@Ignore
 	public void testSetup() {
 		EntityManagerFactory emf = Persistence
 				.createEntityManagerFactory("test");
