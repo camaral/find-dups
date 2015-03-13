@@ -16,17 +16,11 @@
 package midas.controller;
 
 import javax.transaction.Transactional;
-import javax.ws.rs.NotFoundException;
 
 import midas.domain.Customer;
 import midas.entity.jpa.CustomerJpa;
 import midas.entity.solr.CustomerSolr;
-import midas.repository.jpa.CustomerJpaRepository;
-import midas.repository.solr.CustomerSolrRepository;
 
-import org.dozer.Mapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -34,18 +28,9 @@ import org.springframework.stereotype.Controller;
  *
  */
 @Controller
-public class CustomerController {
+public class CustomerController extends BaseCustomerController {
 
-	@Autowired
-	private CustomerJpaRepository customerJpaRepo;
-
-	@Autowired
-	private CustomerSolrRepository customerSolrRepo;
-
-	@Autowired
-	@Qualifier("customerMapper")
-	private Mapper mapper;
-
+	@Transactional
 	public Customer create(final Customer customer) {
 		CustomerJpa entity = mapToEntity(customer);
 		entity = customerJpaRepo.save(entity);
@@ -60,46 +45,21 @@ public class CustomerController {
 
 	@Transactional
 	public Customer retrieve(final Integer id) {
-		final CustomerJpa entity = findEntity(id);
-		return mapToDomain(entity);
+		return find(id);
 	}
 
 	@Transactional
 	public Customer update(final Integer id, final Customer customer) {
-		final CustomerJpa entity = findEntity(id);
+		CustomerJpa entity = findEntity(id);
 		mapToEntity(customer, entity);
-		customerJpaRepo.save(entity);
+		entity = customerJpaRepo.save(entity);
 		return mapToDomain(entity);
 	}
 
 	@Transactional
 	public Customer delete(final Integer id) {
-		final CustomerJpa entity = findEntity(id);
+		final Customer domain = find(id);
 		customerJpaRepo.delete(id);
-		return mapToDomain(entity);
-	}
-
-	private CustomerJpa findEntity(final Integer id) {
-		final CustomerJpa entity = customerJpaRepo.findOne(id);
-		if (entity == null) {
-			throw new NotFoundException();
-		}
-		return entity;
-	}
-
-	private CustomerJpa mapToEntity(final Customer domain) {
-		return mapper.map(domain, CustomerJpa.class);
-	}
-
-	private void mapToEntity(final Customer domain, final CustomerJpa entity) {
-		mapper.map(domain, entity);
-	}
-
-	private Customer mapToDomain(final CustomerJpa entity) {
-		return mapper.map(entity, Customer.class);
-	}
-
-	private CustomerSolr mapToSolr(final Customer domain) {
-		return mapper.map(domain, CustomerSolr.class);
+		return domain;
 	}
 }

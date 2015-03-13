@@ -127,7 +127,7 @@ public class PopulateDatabase {
 	}
 
 	@Test
-	public void testA() {
+	public void testMoreLikeThis() {
 		Pageable page = new SolrPageRequest(0, 5);
 		Page<CustomerSolr> customers = customerSolrRepo.findMoreLikeThis("haygood sparkman", page);
 		for (CustomerSolr customerSolr : customers) {

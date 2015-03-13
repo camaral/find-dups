@@ -15,9 +15,12 @@
  */
 package midas.domain;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -31,66 +34,82 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class Customer {
-	private Integer id;
-	private String firstName;
-	private String lastName;
+@XmlSeeAlso(Customer.class)
+public class DomainPage<T> {
+	private Integer page;
+	private Integer pages;
+	private Integer count;
 
-	public Customer() {
+	private List<T> items;
+
+	public DomainPage() {
 	}
 
-	public Customer(final Integer id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return the id
-	 */
-	public Integer getId() {
-		return id;
-	}
-
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Integer id) {
-		this.id = id;
+	public DomainPage(final Integer page, final Integer pages,
+			final Integer count, final List<T> items) {
+		this.page = page;
+		this.pages = pages;
+		this.count = count;
+		this.items = items;
 	}
 
 	/**
-	 * @return the firstName
+	 * @return the page
 	 */
-	public String getFirstName() {
-		return firstName;
+	public Integer getPage() {
+		return page;
 	}
 
 	/**
-	 * @param firstName
-	 *            the firstName to set
+	 * @param page
+	 *            the page to set
 	 */
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
+	public void setPage(Integer page) {
+		this.page = page;
 	}
 
 	/**
-	 * @return the lastName
+	 * @return the pages
 	 */
-	public String getLastName() {
-		return lastName;
+	public Integer getPages() {
+		return pages;
 	}
 
 	/**
-	 * @param lastName
-	 *            the lastName to set
+	 * @param pages
+	 *            the pages to set
 	 */
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setPages(Integer pages) {
+		this.pages = pages;
 	}
 
-	@Override
-	public String toString() {
-		return "Customer [id=" + id + ", firstName=" + firstName
-				+ ", lastName=" + lastName + "]";
+	/**
+	 * @return the count
+	 */
+	public Integer getCount() {
+		return count;
+	}
+
+	/**
+	 * @param count
+	 *            the count to set
+	 */
+	public void setCount(Integer count) {
+		this.count = count;
+	}
+
+	/**
+	 * @return the items
+	 */
+	public List<T> getItems() {
+		return items;
+	}
+
+	/**
+	 * @param items
+	 *            the items to set
+	 */
+	public void setItems(List<T> items) {
+		this.items = items;
 	}
 }

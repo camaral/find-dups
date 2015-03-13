@@ -16,7 +16,7 @@
     <!-- Setup the Root category -->
     <!-- ======================= -->
     <root>
-        <level value="INFO"/>
+        <level value="DEBUG"/>
         <appender-ref ref="CONSOLE" />
     </root>
 </log4j:configuration>

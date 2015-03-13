@@ -29,12 +29,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import midas.domain.Customer;
+import midas.domain.DomainPage;
 import midas.testcategory.Integration;
 
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -58,6 +61,16 @@ public class CustomerServiceTest {
 				.target("http://localhost:9095/");
 
 		customerService = target.proxy(CustomerServiceApi.class);
+	}
+
+	@Before
+	public void cleanUp() throws Exception {
+		final String solrHost = "http://localhost:8983/solr/customer";
+		final HttpSolrServer solrServer = new HttpSolrServer(solrHost);
+
+		solrServer.deleteByQuery("first_name_s:Caio");
+		solrServer.deleteByQuery("first_name_s:caio");
+		solrServer.deleteByQuery("first_name_s:Kyle");
 	}
 
 	@Test
@@ -197,6 +210,34 @@ public class CustomerServiceTest {
 		Assert.assertEquals("Kyle", found.getFirstName());
 		Assert.assertEquals("Amaral", found.getLastName());
 	}
+
+	@Test
+	public void testRetrieveDuplicatesById() {
+		Customer customer = new Customer();
+		customer.setFirstName("Caio");
+		customer.setLastName("Amaral");
+		Response response = customerService.create(customer);
+
+		final Integer id = response.readEntity(Customer.class).getId();
+
+		String lastName = "Amaral ";
+		for (int i = 0; i < 5; i++) {
+			lastName += i;
+			customer.setLastName(lastName);
+			response = customerService.create(customer);
+			response.readEntity(Customer.class);
+		}
+
+		DomainPage<Customer> duplicates = customerService
+				.retrieveDuplicates(id);
+
+		Assert.assertEquals(5, duplicates.getCount().intValue());
+
+		for (Customer dup : duplicates.getItems()) {
+			Assert.assertNotEquals(id, dup.getId());
+			System.out.println(dup);
+		}
+	}
 }
 
 @Path("customers")
@@ -219,4 +260,9 @@ interface CustomerServiceApi {
 	@DELETE
 	@Path("{id}")
 	public Customer delete(@PathParam("id") final Integer id);
+
+	@GET
+	@Path("{id}/duplicates")
+	public DomainPage<Customer> retrieveDuplicates(
+			@PathParam("id") final Integer id);
 }

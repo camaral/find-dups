@@ -30,7 +30,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import midas.controller.CustomerController;
+import midas.controller.CustomerDuplicatesController;
 import midas.domain.Customer;
+import midas.domain.DomainPage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,9 @@ public class CustomerService {
 
 	@Autowired
 	private CustomerController customerController;
+
+	@Autowired
+	private CustomerDuplicatesController customerDuplicatesController;
 
 	@POST
 	public Response create(final Customer customer) throws URISyntaxException {
@@ -77,8 +82,9 @@ public class CustomerService {
 
 	@GET
 	@Path("{id}/duplicates")
-	public Response retrieveDuplicates(@PathParam("id") final Integer id) {
-		return Response.serverError().build();
+	public DomainPage<Customer> retrieveDuplicates(
+			@PathParam("id") final Integer id) {
+		return customerDuplicatesController.retrieveDuplicates(id);
 	}
 
 	@GET

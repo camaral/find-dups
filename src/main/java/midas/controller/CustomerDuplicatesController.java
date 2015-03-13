@@ -13,27 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package midas.repository.solr;
+package midas.controller;
 
+import midas.domain.Customer;
+import midas.domain.DomainPage;
+import midas.entity.jpa.CustomerJpa;
 import midas.entity.solr.CustomerSolr;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.solr.repository.Query;
-import org.springframework.data.solr.repository.SolrCrudRepository;
+import org.springframework.data.solr.core.query.SolrPageRequest;
+import org.springframework.stereotype.Controller;
 
 /**
  * @author caio.amaral
  *
  */
-public interface CustomerSolrRepository extends
-		SolrCrudRepository<CustomerSolr, Integer> {
+@Controller
+public class CustomerDuplicatesController extends BaseCustomerController {
+	private static final int MAX_DUPLICATES = 5;
 
-	@Query(value = "?0&mlt.fl=last_name_s,first_name_s&mlt.mindf=1&mlt.mintf=1")
-	Page<CustomerSolr> findMoreLikeThis(String name, Pageable page);
+	public DomainPage<Customer> retrieveDuplicates(final Integer id) {
+		final CustomerJpa entity = findEntity(id);
+		final Pageable page = new SolrPageRequest(0, MAX_DUPLICATES);
 
-	@Query(value = "?1 ?2 AND -id:?0")
-	//&mlt.fl=last_name_s,first_name_s&mlt.mindf=1&mlt.mintf=1
-	Page<CustomerSolr> findMoreLikeThis(Integer id, String firstName,
-			String lastName, Pageable page);
+		final Page<CustomerSolr> duplicates = customerSolrRepo
+				.findMoreLikeThis(id, entity.getFirstName(),
+						entity.getLastName(), page);
+
+		return mapToDomain(duplicates);
+	}
 }
