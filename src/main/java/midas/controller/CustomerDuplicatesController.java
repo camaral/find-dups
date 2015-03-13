@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author caio.amaral
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Controller;
 public class CustomerDuplicatesController extends BaseCustomerController {
 	private static final int MAX_DUPLICATES = 5;
 
+	@Transactional(readOnly = true)
 	public DomainPage<Customer> retrieveDuplicates(final Integer id) {
 		final CustomerJpa entity = findEntity(id);
 		final Pageable page = new SolrPageRequest(0, MAX_DUPLICATES);

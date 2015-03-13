@@ -15,13 +15,12 @@
  */
 package midas.controller;
 
-import javax.transaction.Transactional;
-
 import midas.domain.Customer;
 import midas.entity.jpa.CustomerJpa;
 import midas.entity.solr.CustomerSolr;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author caio.amaral
@@ -32,7 +31,30 @@ public class CustomerController extends BaseCustomerController {
 
 	@Transactional
 	public Customer create(final Customer customer) {
-		CustomerJpa entity = mapToEntity(customer);
+		final CustomerJpa entity = mapToEntity(customer);
+		return save(entity);
+	}
+
+	@Transactional(readOnly = true)
+	public Customer retrieve(final Integer id) {
+		return find(id);
+	}
+
+	@Transactional
+	public Customer update(final Integer id, final Customer customer) {
+		final CustomerJpa entity = findEntity(id);
+		mapToEntity(customer, entity);
+		return save(entity);
+	}
+
+	@Transactional
+	public Customer delete(final Integer id) {
+		final Customer domain = find(id);
+		customerJpaRepo.delete(id);
+		return domain;
+	}
+
+	private Customer save(CustomerJpa entity) {
 		entity = customerJpaRepo.save(entity);
 
 		final Customer domain = mapToDomain(entity);
@@ -40,26 +62,6 @@ public class CustomerController extends BaseCustomerController {
 		final CustomerSolr document = mapToSolr(domain);
 		customerSolrRepo.save(document);
 
-		return domain;
-	}
-
-	@Transactional
-	public Customer retrieve(final Integer id) {
-		return find(id);
-	}
-
-	@Transactional
-	public Customer update(final Integer id, final Customer customer) {
-		CustomerJpa entity = findEntity(id);
-		mapToEntity(customer, entity);
-		entity = customerJpaRepo.save(entity);
-		return mapToDomain(entity);
-	}
-
-	@Transactional
-	public Customer delete(final Integer id) {
-		final Customer domain = find(id);
-		customerJpaRepo.delete(id);
 		return domain;
 	}
 }
