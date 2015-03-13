@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package midas.repository;
+package midas.repository.solr;
 
-import midas.entity.CustomerEntity;
+import midas.entity.solr.CustomerSolr;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.repository.Query;
+import org.springframework.data.solr.repository.SolrCrudRepository;
 
 /**
  * @author caio.amaral
  *
  */
-public interface CustomerRepository extends JpaRepository<CustomerEntity, Integer> {
+public interface CustomerSolrRepository extends
+		SolrCrudRepository<CustomerSolr, Integer> {
 
+	@Query(value = "first_name_s:?0")
+	Page<CustomerSolr> findByNameAndFacetOnCategory(String name, Pageable page);
 }

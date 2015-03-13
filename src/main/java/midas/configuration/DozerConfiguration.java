@@ -16,7 +16,8 @@
 package midas.configuration;
 
 import midas.domain.Customer;
-import midas.entity.CustomerEntity;
+import midas.entity.jpa.CustomerJpa;
+import midas.entity.solr.CustomerSolr;
 
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
@@ -31,15 +32,19 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class DozerConfiguration {
+
 	@Bean
 	public Mapper customerMapper() {
 		final BeanMappingBuilder builder = new BeanMappingBuilder() {
 			protected void configure() {
-				mapping(Customer.class, CustomerEntity.class,
+				mapping(Customer.class, CustomerJpa.class,
 						TypeMappingOptions.oneWay(),
 						TypeMappingOptions.mapNull(true)).exclude("id");
 
-				mapping(CustomerEntity.class, Customer.class,
+				mapping(Customer.class, CustomerSolr.class,
+						TypeMappingOptions.mapNull(true));
+
+				mapping(CustomerJpa.class, Customer.class,
 						TypeMappingOptions.oneWay(),
 						TypeMappingOptions.mapNull(true));
 			}

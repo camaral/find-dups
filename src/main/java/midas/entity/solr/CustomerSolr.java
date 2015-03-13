@@ -13,28 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package midas.entity;
+package midas.entity.solr;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.apache.solr.client.solrj.beans.Field;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.solr.core.mapping.Indexed;
+import org.springframework.data.solr.core.mapping.SolrDocument;
 
 /**
  * @author caio.amaral
  *
  */
-@Entity
-@Table(name = "CUSTOMERS")
-public class CustomerEntity {
-	@Id
-	@GeneratedValue
-	private Integer id;
+@SolrDocument(solrCoreName = "customer")
+public class CustomerSolr {
 
-	@Column(name = "FIRST_NAME")
+	@Id
+	private Integer id;
+	@Indexed
+	@Field("first_name_s")
 	private String firstName;
-	@Column(name = "LAST_NAME")
+	@Indexed
+	@Field("last_name_s")
 	private String lastName;
 
 	/**
@@ -81,4 +80,5 @@ public class CustomerEntity {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
+
 }

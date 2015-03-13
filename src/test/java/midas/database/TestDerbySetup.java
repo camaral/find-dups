@@ -20,7 +20,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 
-import midas.entity.CustomerEntity;
+import midas.entity.jpa.CustomerJpa;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,9 +39,9 @@ public class TestDerbySetup {
 		EntityManager em = emf.createEntityManager();
 		EntityTransaction tx = em.getTransaction();
 
-		CustomerEntity test = em.find(CustomerEntity.class, 1);
+		CustomerJpa test = em.find(CustomerJpa.class, 1);
 		if (test == null) {
-			test = new CustomerEntity();
+			test = new CustomerJpa();
 			test.setFirstName("caio");
 			test.setLastName("amaral");
 
@@ -49,7 +49,7 @@ public class TestDerbySetup {
 			em.persist(test);
 			tx.commit();
 
-			test = em.find(CustomerEntity.class, 1);
+			test = em.find(CustomerJpa.class, 1);
 		}
 
 		System.out.format("Test{id=%s, name=%s %s}\n", test.getId(),

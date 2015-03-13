@@ -5,21 +5,20 @@
   version="2.0">
   <persistence-unit name="test">
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-    <class>midas.model.Customer</class>
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
       <!--
         if you don't have a database already created
         append ;create=true to end of the jdbc url
       -->
-      <property name="javax.persistence.jdbc.url" value="jdbc:derby:test;create=true"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:derby:test"/>
       <property name="javax.persistence.jdbc.user" value="root"/>
       <property name="javax.persistence.jdbc.password" value="root"/>
       <!--  
         if you just created the database, maybe
         you want hibernate to create a schema for you
       -->
-      <property name="hibernate.hbm2ddl.auto" value="create"/>
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
     </properties>
   </persistence-unit>
 </persistence>
