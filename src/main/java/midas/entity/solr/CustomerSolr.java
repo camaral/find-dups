@@ -36,6 +36,16 @@ public class CustomerSolr {
 	@Field("last_name_s")
 	private String lastName;
 
+	public CustomerSolr() {
+	}
+
+	public CustomerSolr(final Integer id, final String firstName,
+			final String lastName) {
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+	}
+
 	/**
 	 * @return the id
 	 */

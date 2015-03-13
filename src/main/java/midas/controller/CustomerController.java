@@ -52,8 +52,8 @@ public class CustomerController {
 
 		final Customer domain = mapToDomain(entity);
 
-		final CustomerSolr solr = mapToSolr(domain);
-		customerSolrRepo.save(solr);
+		final CustomerSolr document = mapToSolr(domain);
+		customerSolrRepo.save(document);
 
 		return domain;
 	}
