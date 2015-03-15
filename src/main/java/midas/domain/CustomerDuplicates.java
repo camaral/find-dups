@@ -20,7 +20,6 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -34,82 +33,38 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@XmlSeeAlso({ Customer.class, CustomerDuplicates.class })
-public class DomainPage<T> {
-	private Integer page;
-	private Integer pages;
-	private Integer count;
+public class CustomerDuplicates {
+	public Customer customer;
+	public List<Customer> duplicates;
 
-	private List<T> items;
-
-	public DomainPage() {
-	}
-
-	public DomainPage(final Integer page, final Integer pages,
-			final Integer count, final List<T> items) {
-		this.page = page;
-		this.pages = pages;
-		this.count = count;
-		this.items = items;
+	/**
+	 * @return the customer
+	 */
+	public Customer getCustomer() {
+		return customer;
 	}
 
 	/**
-	 * @return the page
+	 * @param customer
+	 *            the customer to set
 	 */
-	public Integer getPage() {
-		return page;
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
 	}
 
 	/**
-	 * @param page
-	 *            the page to set
+	 * @return the duplicates
 	 */
-	public void setPage(Integer page) {
-		this.page = page;
+	public List<Customer> getDuplicates() {
+		return duplicates;
 	}
 
 	/**
-	 * @return the pages
+	 * @param duplicates
+	 *            the duplicates to set
 	 */
-	public Integer getPages() {
-		return pages;
+	public void setDuplicates(List<Customer> duplicates) {
+		this.duplicates = duplicates;
 	}
 
-	/**
-	 * @param pages
-	 *            the pages to set
-	 */
-	public void setPages(Integer pages) {
-		this.pages = pages;
-	}
-
-	/**
-	 * @return the count
-	 */
-	public Integer getCount() {
-		return count;
-	}
-
-	/**
-	 * @param count
-	 *            the count to set
-	 */
-	public void setCount(Integer count) {
-		this.count = count;
-	}
-
-	/**
-	 * @return the items
-	 */
-	public List<T> getItems() {
-		return items;
-	}
-
-	/**
-	 * @param items
-	 *            the items to set
-	 */
-	public void setItems(List<T> items) {
-		this.items = items;
-	}
 }

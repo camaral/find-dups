@@ -15,25 +15,32 @@
  */
 package midas.database;
 
+import java.util.Arrays;
 import java.util.Random;
 
+import midas.entity.jpa.CustomerDuplicatesJpa;
+import midas.entity.jpa.CustomerDuplicatesListJpa;
 import midas.entity.jpa.CustomerJpa;
 import midas.entity.solr.CustomerSolr;
+import midas.repository.jpa.CustomerDuplicatesJpaRepository;
 import midas.repository.jpa.CustomerJpaRepository;
 import midas.repository.solr.CustomerSolrRepository;
 import midas.testcategory.TryOut;
 
 import org.dozer.Mapper;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author caio.amaral
@@ -91,6 +98,9 @@ public class PopulateDatabase {
 	private CustomerJpaRepository customerJpaRepo;
 
 	@Autowired
+	private CustomerDuplicatesJpaRepository customerDuplicatesJpaRepo;
+
+	@Autowired
 	@Qualifier("customerMapper")
 	private Mapper customerMapper;
 
@@ -121,7 +131,8 @@ public class PopulateDatabase {
 					CustomerSolr.class);
 			customerSolrRepo.save(document);
 
-			final CustomerJpa entity = customerMapper.map(domain, CustomerJpa.class);
+			final CustomerJpa entity = customerMapper.map(domain,
+					CustomerJpa.class);
 			customerJpaRepo.save(entity);
 		}
 	}
@@ -129,9 +140,56 @@ public class PopulateDatabase {
 	@Test
 	public void testMoreLikeThis() {
 		Pageable page = new SolrPageRequest(0, 5);
-		Page<CustomerSolr> customers = customerSolrRepo.findMoreLikeThis("haygood sparkman", page);
+		Page<CustomerSolr> customers = customerSolrRepo.findMoreLikeThis(
+				"haygood sparkman", page);
 		for (CustomerSolr customerSolr : customers) {
-			System.out.println(customerSolr.getFirstName() +" " + customerSolr.getLastName());
+			System.out.println(customerSolr.getFirstName() + " "
+					+ customerSolr.getLastName());
+		}
+	}
+
+	@Test
+	@Transactional
+	public void testCreateDuplicate() {
+		CustomerJpa customer = new CustomerJpa();
+		customer.setFirstName("caio");
+		customer.setLastName("amaral");
+		customer = customerJpaRepo.save(customer);
+
+		CustomerDuplicatesListJpa duplicate = new CustomerDuplicatesListJpa();
+		duplicate.setDuplicateId(1);
+		duplicate.setProbability(99);
+
+		CustomerDuplicatesJpa customerDuplicates = new CustomerDuplicatesJpa();
+		customerDuplicates.setCustomerId(customer.getId());
+		customerDuplicates.setHigherDuplicateProbability(99);
+		customerDuplicates.setDuplicates(Arrays.asList(duplicate));
+		customerDuplicates = customerDuplicatesJpaRepo.save(customerDuplicates);
+
+		Assert.assertNotNull(customerDuplicates.getId());
+
+		customerDuplicates = customerDuplicatesJpaRepo.findOne(customerDuplicates.getId());
+		
+		Assert.assertNotNull(customerDuplicates.getDuplicates());
+		Assert.assertFalse(customerDuplicates.getDuplicates().isEmpty());
+		Assert.assertEquals(Integer.valueOf(1), customerDuplicates.getDuplicates().get(0).getDuplicateId());
+		
+	}
+
+	@Test
+	@Transactional
+	public void testFindDuplicateList() {
+		final Pageable pageable = new PageRequest(0,
+				10);
+
+		Page<CustomerDuplicatesJpa> findAll = customerDuplicatesJpaRepo.findAll(pageable);
+		
+		for (CustomerDuplicatesJpa customerDuplicates : findAll) {
+			Assert.assertNotNull(customerDuplicates.getDuplicates());
+			Assert.assertFalse(customerDuplicates.getDuplicates().isEmpty());
+			Assert.assertNotNull(customerDuplicates.getDuplicates().get(0).getDuplicateId());
+			Assert.assertNotNull(customerDuplicates.getDuplicates().get(0).getDuplicate());
+			Assert.assertNotNull(customerDuplicates.getDuplicates().get(0).getDuplicate().getFirstName());
 		}
 	}
 }

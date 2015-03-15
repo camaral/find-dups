@@ -15,13 +15,9 @@
  */
 package midas.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.ws.rs.NotFoundException;
 
 import midas.domain.Customer;
-import midas.domain.DomainPage;
 import midas.entity.jpa.CustomerJpa;
 import midas.entity.solr.CustomerSolr;
 import midas.repository.jpa.CustomerJpaRepository;
@@ -30,7 +26,6 @@ import midas.repository.solr.CustomerSolrRepository;
 import org.dozer.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
 
 /**
  * @author caio.amaral
@@ -74,16 +69,6 @@ public class BaseCustomerController {
 
 	protected Customer mapToDomain(final CustomerJpa entity) {
 		return mapper.map(entity, Customer.class);
-	}
-
-	protected DomainPage<Customer> mapToDomain(
-			final Page<CustomerSolr> documents) {
-		final List<Customer> domainList = new ArrayList<>();
-		for (CustomerSolr doc : documents) {
-			domainList.add(mapper.map(doc, Customer.class));
-		}
-		return new DomainPage<Customer>(documents.getNumber(),
-				documents.getTotalPages(), documents.getSize(), domainList);
 	}
 
 	protected CustomerSolr mapToSolr(final Customer domain) {

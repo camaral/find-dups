@@ -26,12 +26,14 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import midas.controller.CustomerController;
 import midas.controller.CustomerDuplicatesController;
 import midas.domain.Customer;
+import midas.domain.CustomerDuplicates;
 import midas.domain.CustomerDuplicatesIndex;
 import midas.domain.DomainPage;
 
@@ -90,8 +92,9 @@ public class CustomerService {
 
 	@GET
 	@Path("/duplicates")
-	public Response retrieveAllDuplicates() {
-		return Response.serverError().build();
+	public DomainPage<CustomerDuplicates> retrieveDuplicates(@QueryParam("page") final Integer page,
+			@QueryParam("count") final Integer count) {
+		return customerDuplicatesController.retrieveDuplicates(page, count);
 	}
 
 	@POST
@@ -105,6 +108,8 @@ public class CustomerService {
 	@GET
 	@Path("/duplicates/index")
 	public Response retriveIndex() {
+		// TODO: return indexing execution status, number of executed pages and
+		// total pages
 		return Response.serverError().build();
 	}
 }
