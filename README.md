@@ -103,64 +103,36 @@ $ curl  "http://localhost:9095/customers/21/duplicates/" -H "Accept: application
 
 ####Retrieve all possible duplicates
 ```bash
+# sync=true responds only after the index process finishes; sync=false (default) accepts the request and process it asynchronously
 $ curl  "http://localhost:9095/customers/duplicates/index?sync=true" -X POST -H "Accept: application/json"
 {"pages":1,"count":10,"status":"FINISHED"}
 
-$ $ curl  "http://localhost:9095/customers/duplicates?page=0&count=10" -H "Accept: application/json"
+$ curl  "http://localhost:9095/customers/duplicates?page=0&count=10" -H "Accept: application/json"
 {  
    "page":0,
    "pages":1,
    "count":10,
    "items":[  
-      {  
-         "id":20,
+      {  "id":20,
          "firstName":"Kyle",
          "lastName":"Amaral",
-         "duplicates":[  
-            {  
-               "id":21,
-               "firstName":"Caio",
-               "lastName":"Amaral"
-            },
-            {  
-               "id":22,
-               "firstName":"Caio",
-               "lastName":"Brandao Amaral"
-            }
+         "duplicates":[ { "id":21,"firstName":"Caio", "lastName":"Amaral"},
+            { "id":22, "firstName":"Caio", "lastName":"Brandao Amaral" }
          ]
       },
-      {  
-         "id":21,
+      {  "id":21,
          "firstName":"Caio",
          "lastName":"Amaral",
-         "duplicates":[  
-            {  
-               "id":22,
-               "firstName":"Caio",
-               "lastName":"Brandao Amaral"
-            },
-            {  
-               "id":20,
-               "firstName":"Kyle",
-               "lastName":"Amaral"
+         "duplicates":[ { "id":22, "firstName":"Caio", "lastName":"Brandao Amaral"},
+            { "id":20, "firstName":"Kyle", "lastName":"Amaral"
             }
          ]
       },
-      {  
-         "id":22,
+      {  "id":22,
          "firstName":"Caio",
          "lastName":"Brandao Amaral",
-         "duplicates":[  
-            {  
-               "id":21,
-               "firstName":"Caio",
-               "lastName":"Amaral"
-            },
-            {  
-               "id":20,
-               "firstName":"Kyle",
-               "lastName":"Amaral"
-            }
+         "duplicates":[{ "id":21, "firstName":"Caio","lastName":"Amaral"},
+            { "id":20, "firstName":"Kyle", "lastName":"Amaral" }
          ]
       }
    ]
