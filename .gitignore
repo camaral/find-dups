@@ -21,8 +21,11 @@ target/
 
 # intellij
 .idea
-sheeco.iml
+find-dups.iml
 
 # derby
 derby.log
 /test/
+
+# activemq
+activemq-data

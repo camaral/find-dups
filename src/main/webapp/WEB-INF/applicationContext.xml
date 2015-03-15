@@ -13,6 +13,6 @@
 
 	<context:annotation-config/>
 
-	<context:component-scan base-package="midas.configuration, midas.service, midas.controller"/>
+	<context:component-scan base-package="midas.configuration, midas.service, midas.controller, midas.processor"/>
 
 </beans>

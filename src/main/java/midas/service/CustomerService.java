@@ -96,7 +96,8 @@ public class CustomerService {
 	@POST
 	@Path("/duplicates/index")
 	public Response createIndex() {
-		return Response.serverError().build();
+		customerDuplicatesController.indexDuplicates();
+		return Response.accepted().build();
 	}
 
 	@GET
