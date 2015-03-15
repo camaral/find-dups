@@ -93,4 +93,76 @@ $ curl  "http://localhost:9095/customers/1" -X DELETE -H "Accept: application/js
 ```
 
 ###Duplicates
-Checking for duplicates is available in two flavours. First, you can get the duplicates directly from one customer; in this case, the search is made on the fly, returning up to 5 results. The second option is to list all customers that may have duplicates; for that to work, first is necessary to indexing all the customers, that is, to look for duplicates for every existent customer. I implemented the index as a REST service, so testing is easy. In the future it can also be an scheduled process.
+Checking for duplicates is available in two flavours, both returns up to 5 results. First, you can get the duplicates directly from one customer; in this case, the search is made on the fly. The second option is to list all customers that may have duplicates; for that to work, first is necessary to indexing all the customers, that is, to look for duplicates for every existent customer. I implemented the index as a REST service, so testing is easy. In the future it can also be an scheduled process.
+
+####Retrieve possible duplicates from one customer
+```bash
+$ curl  "http://localhost:9095/customers/21/duplicates/" -H "Accept: application/json"
+{"duplicates":[{"id":22,"firstName":"Caio","lastName":"Brandao Amaral"},{"id":20,"firstName":"Kyle","lastName":"Amaral"}]}
+```
+
+####Retrieve all possible duplicates
+```bash
+$ curl  "http://localhost:9095/customers/duplicates/index?sync=true" -X POST -H "Accept: application/json"
+{"pages":1,"count":10,"status":"FINISHED"}
+
+$ $ curl  "http://localhost:9095/customers/duplicates?page=0&count=10" -H "Accept: application/json"
+{  
+   "page":0,
+   "pages":1,
+   "count":10,
+   "items":[  
+      {  
+         "id":20,
+         "firstName":"Kyle",
+         "lastName":"Amaral",
+         "duplicates":[  
+            {  
+               "id":21,
+               "firstName":"Caio",
+               "lastName":"Amaral"
+            },
+            {  
+               "id":22,
+               "firstName":"Caio",
+               "lastName":"Brandao Amaral"
+            }
+         ]
+      },
+      {  
+         "id":21,
+         "firstName":"Caio",
+         "lastName":"Amaral",
+         "duplicates":[  
+            {  
+               "id":22,
+               "firstName":"Caio",
+               "lastName":"Brandao Amaral"
+            },
+            {  
+               "id":20,
+               "firstName":"Kyle",
+               "lastName":"Amaral"
+            }
+         ]
+      },
+      {  
+         "id":22,
+         "firstName":"Caio",
+         "lastName":"Brandao Amaral",
+         "duplicates":[  
+            {  
+               "id":21,
+               "firstName":"Caio",
+               "lastName":"Amaral"
+            },
+            {  
+               "id":20,
+               "firstName":"Kyle",
+               "lastName":"Amaral"
+            }
+         ]
+      }
+   ]
+}
+```
