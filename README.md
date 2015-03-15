@@ -5,15 +5,15 @@
 What is used in the implementation
 
 ###Frameworks
--**Spring:** For dependency inject. I created almost everything with annotations. I kept as xml when it was easier this way.
--**Resteasy:** For REST API implementation and resteasy-client with proxy to write the tests.
--**Spring-Data:** To access database and solr.
--**Dozer:** For java bean mapping between domain and entity objects
+-Spring: For dependency inject. I created almost everything with annotations. I kept as xml when it was easier this way.
+-Resteasy: For REST API implementation and resteasy-client with proxy to write the tests.
+-Spring-Data: To access database and solr.
+-Dozer: For java bean mapping between domain and entity objects
 
 ###Aplications
--**Derby:** Database.
--**ActiveMQ:** To provide queues for asynchronous processing. It make it easy to scale the batch processing.
--**Solr:** Solr is the main part of the de-duplication. Provides lots of searching features (MoreLikeThis, GeoSearch, Terms frequency and relevancy) and can be configured to achieve the desired precision. It also can scale.
+-Derby: Database.
+-ActiveMQ: To provide queues for asynchronous processing. It make it easy to scale the batch processing.
+-Solr: Solr is the main part of the de-duplication. Provides lots of searching features (MoreLikeThis, GeoSearch, Terms frequency and relevancy) and can be configured to achieve the desired precision. It also can scale.
 
 I configured both Derby and ActiveMQ embedded to make it easy to test the project. I decided to not embed Solr because it is to big to keep inside the project.
 
