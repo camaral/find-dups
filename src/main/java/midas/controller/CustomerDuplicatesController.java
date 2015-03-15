@@ -27,14 +27,10 @@ import midas.domain.CustomerDuplicates;
 import midas.domain.CustomerDuplicatesIndex;
 import midas.domain.CustomerDuplicatesIndexingPage;
 import midas.domain.DomainPage;
-import midas.entity.jpa.CustomerDuplicatesJpa;
-import midas.entity.jpa.CustomerDuplicatesListJpa;
+import midas.domain.IndexStatus;
 import midas.entity.jpa.CustomerJpa;
 import midas.entity.solr.CustomerSolr;
-import midas.repository.jpa.CustomerDuplicatesJpaRepository;
-import midas.repository.jpa.CustomerDuplicatesListJpaRepository;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -63,11 +59,6 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 	@Autowired
 	private JmsTemplate jmsTemplate;
 
-	@Autowired
-	private CustomerDuplicatesJpaRepository customerDuplicatesJpaRepo;
-	@Autowired
-	private CustomerDuplicatesListJpaRepository customerDuplicatesListJpaRepo;
-
 	@Transactional(readOnly = true)
 	public CustomerDuplicates retrieveDuplicates(final Integer id) {
 		final CustomerJpa entity = findEntity(id);
@@ -89,13 +80,14 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 			final Integer page, final Integer count) {
 		final Pageable pageable = new PageRequest(page, count);
 
-		final Page<CustomerDuplicatesJpa> entityPage = customerDuplicatesJpaRepo
-				.findAll(pageable);
+		final Page<CustomerJpa> entityPage = customerJpaRepo
+				.findDuplicates(pageable);
 
-		return mapIndexedDuplicatesToDomain(entityPage);
+		return mapToCustomerDuplicates(entityPage);
 	}
 
-	public CustomerDuplicatesIndex indexDuplicates() {
+	@Transactional
+	public CustomerDuplicatesIndex indexDuplicates(final Boolean sync) {
 		// TODO: Would be nice to prevent multiples calls while the indexing is
 		// executing. Save lock, indexing execution status, number of executed
 		// pages and total pages
@@ -105,16 +97,21 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 		for (int page = 0; page < numPages; page++) {
 			final CustomerDuplicatesIndexingPage indexPage = new CustomerDuplicatesIndexingPage(
 					page, numPages, INDEX_PAGE_SIZE);
-
-			jmsTemplate.send(INDEX_QUEUE_NAME, new MessageCreator() {
-				public Message createMessage(Session session)
-						throws JMSException {
-					return session.createObjectMessage(indexPage);
-				}
-			});
+			if (Boolean.TRUE.equals(sync)) {
+				indexDuplicates(indexPage);
+			} else {
+				jmsTemplate.send(INDEX_QUEUE_NAME, new MessageCreator() {
+					public Message createMessage(Session session)
+							throws JMSException {
+						return session.createObjectMessage(indexPage);
+					}
+				});
+			}
 		}
 
-		return new CustomerDuplicatesIndex(numPages, INDEX_PAGE_SIZE);
+		return new CustomerDuplicatesIndex(numPages, INDEX_PAGE_SIZE,
+				(Boolean.TRUE.equals(sync) ? IndexStatus.FINISHED
+						: IndexStatus.EXECUTING));
 	}
 
 	@Transactional
@@ -129,11 +126,9 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 
 		for (final CustomerJpa customer : customers) {
 
-			deleteCurrentDuplicates(customer);
-
-			final List<CustomerDuplicatesListJpa> duplicates = findDuplicates(customer);
-
-			saveDuplicates(customer, duplicates);
+			final List<CustomerJpa> duplicates = findDuplicates(customer);
+			customer.setDuplicates(duplicates);
+			customerJpaRepo.save(customer);
 		}
 	}
 
@@ -151,77 +146,42 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 				documents.getTotalPages(), documents.getSize(), domainList);
 	}
 
-	private DomainPage<CustomerDuplicates> mapIndexedDuplicatesToDomain(
-			final Page<CustomerDuplicatesJpa> entities) {
+	private List<Customer> mapEntitiesToDomain(final List<CustomerJpa> entities) {
+		final List<Customer> domainList = new ArrayList<>();
+		for (CustomerJpa doc : entities) {
+			domainList.add(mapper.map(doc, Customer.class));
+		}
+		return domainList;
+	}
+
+	private DomainPage<CustomerDuplicates> mapToCustomerDuplicates(
+			final Page<CustomerJpa> entities) {
 		final List<CustomerDuplicates> domainList = new ArrayList<>();
-		for (final CustomerDuplicatesJpa entity : entities) {
-			final CustomerDuplicates customerDuplicates = mapToCustomerDuplicates(entity
-					.getCustomer());
-
-			final List<Customer> duplicates = new ArrayList<>();
-
-			final List<CustomerDuplicatesListJpa> duplicatesList = customerDuplicatesListJpaRepo
-					.findAllByCustomerDuplicatesId(entity.getId());
-			for (final CustomerDuplicatesListJpa duplicate : duplicatesList) {
-				duplicates.add(mapToDomain(customerJpaRepo.findOne(duplicate
-						.getDuplicateId())));
-			}
-
-			customerDuplicates.setDuplicates(duplicates);
-
-			domainList.add(customerDuplicates);
+		for (CustomerJpa entity : entities) {
+			CustomerDuplicates domain = mapper.map(entity,
+					CustomerDuplicates.class);
+			domain.setDuplicates(mapEntitiesToDomain(entity.getDuplicates()));
+			domainList.add(domain);
 		}
 		return new DomainPage<CustomerDuplicates>(entities.getNumber(),
 				entities.getTotalPages(), entities.getSize(), domainList);
 	}
 
-	private void deleteCurrentDuplicates(final CustomerJpa customer) {
-		final CustomerDuplicatesJpa currentDuplicates = customerDuplicatesJpaRepo
-				.findByCustomerId(customer.getId());
-		if (currentDuplicates != null) {
-			customerDuplicatesJpaRepo.delete(currentDuplicates);
-		}
-	}
-
-	private void saveDuplicates(final CustomerJpa customer,
-			final List<CustomerDuplicatesListJpa> duplicates) {
-
-		if (CollectionUtils.isEmpty(duplicates)) {
-			return;
-		}
-
-		final CustomerDuplicatesJpa customerDuplicates = new CustomerDuplicatesJpa();
-
-		customerDuplicates.setCustomerId(customer.getId());
-		customerDuplicates.setDuplicates(duplicates);
-
-		final CustomerDuplicatesListJpa higherPropabilityDuplicate = customerDuplicates
-				.getDuplicates().get(0);
-
-		customerDuplicates
-				.setHigherDuplicateProbability(higherPropabilityDuplicate
-						.getDuplicateProbability());
-
-		customerDuplicatesJpaRepo.save(customerDuplicates);
-	}
-
-	private List<CustomerDuplicatesListJpa> findDuplicates(
-			final CustomerJpa customer) {
+	private List<CustomerJpa> findDuplicates(final CustomerJpa customer) {
 		final Pageable solrPage = new SolrPageRequest(0, MAX_DUPLICATES);
 
 		final Page<CustomerSolr> solrResponse = customerSolrRepo
 				.findMoreLikeThis(customer.getId(), customer.getFirstName(),
 						customer.getLastName(), solrPage);
 
-		final List<CustomerDuplicatesListJpa> duplicates = new ArrayList<>();
+		final List<CustomerJpa> duplicates = new ArrayList<>();
 
 		for (CustomerSolr customerSolr : solrResponse) {
-			final CustomerDuplicatesListJpa item = new CustomerDuplicatesListJpa();
-			item.setDuplicateId(customerSolr.getId());
-			// TODO: make solr respond highlights and calculate similarity
-			// percentage
-			item.setProbability(100);
-			duplicates.add(item);
+			CustomerJpa duplicated = customerJpaRepo.findOne(customerSolr
+					.getId());
+			if (duplicated != null) {
+				duplicates.add(duplicated);
+			}
 		}
 
 		return duplicates;

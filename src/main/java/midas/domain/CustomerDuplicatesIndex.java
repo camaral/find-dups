@@ -40,10 +40,11 @@ public class CustomerDuplicatesIndex {
 	public CustomerDuplicatesIndex() {
 	}
 
-	public CustomerDuplicatesIndex(final Integer pages, final Integer count) {
+	public CustomerDuplicatesIndex(final Integer pages, final Integer count,
+			final IndexStatus status) {
 		this.pages = pages;
 		this.count = count;
-		this.status = IndexStatus.EXECUTING;
+		this.status = status;
 	}
 
 	/**

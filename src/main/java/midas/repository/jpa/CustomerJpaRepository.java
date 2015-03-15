@@ -17,12 +17,18 @@ package midas.repository.jpa;
 
 import midas.entity.jpa.CustomerJpa;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * @author caio.amaral
  *
  */
-public interface CustomerJpaRepository extends JpaRepository<CustomerJpa, Integer> {
+public interface CustomerJpaRepository extends
+		JpaRepository<CustomerJpa, Integer> {
 
+	@Query("select c from CustomerJpa c where c.duplicates is not empty")
+	Page<CustomerJpa> findDuplicates(Pageable pageable);
 }

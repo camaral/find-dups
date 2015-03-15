@@ -17,6 +17,7 @@ package midas.service;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -24,11 +25,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import midas.domain.Customer;
+import midas.domain.CustomerDuplicates;
 import midas.domain.CustomerDuplicatesIndex;
 import midas.domain.DomainPage;
 import midas.domain.IndexStatus;
@@ -70,9 +73,11 @@ public class CustomerServiceTest {
 		final String solrHost = "http://localhost:8983/solr/customer";
 		final HttpSolrServer solrServer = new HttpSolrServer(solrHost);
 
-		solrServer.deleteByQuery("first_name_s:Caio");
-		solrServer.deleteByQuery("first_name_s:caio");
-		solrServer.deleteByQuery("first_name_s:Kyle");
+		solrServer.deleteByQuery("*:*");
+
+		Response deleteAll = customerService.deleteAll();
+		Assert.assertEquals(200, deleteAll.getStatus());
+		deleteAll.close();
 	}
 
 	@Test
@@ -230,12 +235,11 @@ public class CustomerServiceTest {
 			response.readEntity(Customer.class);
 		}
 
-		DomainPage<Customer> duplicates = customerService
-				.retrieveDuplicates(id);
+		CustomerDuplicates duplicates = customerService.retrieveDuplicates(id);
 
-		Assert.assertEquals(5, duplicates.getCount().intValue());
+		Assert.assertEquals(5, duplicates.getDuplicates().size());
 
-		for (Customer dup : duplicates.getItems()) {
+		for (Customer dup : duplicates.getDuplicates()) {
 			Assert.assertNotEquals(id, dup.getId());
 			System.out.println(dup);
 		}
@@ -243,7 +247,7 @@ public class CustomerServiceTest {
 
 	@Test
 	public void testCreateIndex() {
-		final Response response = customerService.createIndex();
+		final Response response = customerService.createIndex(false);
 		Assert.assertEquals(202, response.getStatus());
 
 		final CustomerDuplicatesIndex duplicatesIndex = response
@@ -252,6 +256,78 @@ public class CustomerServiceTest {
 		Assert.assertNotNull(duplicatesIndex.getPages());
 		Assert.assertEquals(Integer.valueOf(10), duplicatesIndex.getCount());
 		Assert.assertEquals(IndexStatus.EXECUTING, duplicatesIndex.getStatus());
+	}
+
+	@Test
+	public void testRetrieveAllDuplicates() {
+		createCustomer("caio", "amaral");
+
+		String lastName = "Amaral ";
+		for (int i = 0; i < 5; i++) {
+			lastName += i;
+			createCustomer("Caio", lastName);
+		}
+
+		Response response = customerService.createIndex(true);
+		Assert.assertEquals(202, response.getStatus());
+
+		final CustomerDuplicatesIndex duplicatesIndex = response
+				.readEntity(CustomerDuplicatesIndex.class);
+
+		Assert.assertNotNull(duplicatesIndex.getPages());
+		Assert.assertEquals(Integer.valueOf(10), duplicatesIndex.getCount());
+		Assert.assertEquals(IndexStatus.FINISHED, duplicatesIndex.getStatus());
+
+		DomainPage<CustomerDuplicates> duplicates = customerService
+				.retrieveDuplicates(0, 10);
+
+		Assert.assertEquals(0, duplicates.getPage().intValue());
+		Assert.assertEquals(10, duplicates.getCount().intValue());
+
+		CustomerDuplicates customerDuplicates = duplicates.getItems().get(0);
+
+		Assert.assertNotNull(customerDuplicates.getId());
+		Assert.assertEquals("caio", customerDuplicates.getFirstName());
+		Assert.assertEquals("amaral", customerDuplicates.getLastName());
+		Assert.assertEquals(5, customerDuplicates.getDuplicates().size());
+
+		Assert.assertEquals(6, duplicates.getItems().size());
+	}
+
+	@Test
+	public void testMixedDuplications() {
+		createCustomer("Caio", "Amaral");
+		createCustomer("Jose", "Silva");
+		createCustomer("amaral", "Jovem");
+
+		Response response = customerService.createIndex(true);
+		response.close();
+
+		DomainPage<CustomerDuplicates> duplicates = customerService
+				.retrieveDuplicates(0, 10);
+
+		Assert.assertEquals(0, duplicates.getPage().intValue());
+		Assert.assertEquals(10, duplicates.getCount().intValue());
+
+		CustomerDuplicates customerDuplicates = duplicates.getItems().get(0);
+
+		Assert.assertNotNull(customerDuplicates.getId());
+		Assert.assertEquals("Caio", customerDuplicates.getFirstName());
+		Assert.assertEquals("Amaral", customerDuplicates.getLastName());
+		Assert.assertEquals(1, customerDuplicates.getDuplicates().size());
+		Assert.assertEquals("amaral", customerDuplicates.getDuplicates().get(0)
+				.getFirstName());
+
+		Assert.assertEquals(2, duplicates.getItems().size());
+	}
+
+	private void createCustomer(String firstName, String lastName) {
+		Customer customer = new Customer();
+		customer.setFirstName(firstName);
+		customer.setLastName(lastName);
+
+		Response response = customerService.create(customer);
+		response.close();
 	}
 }
 
@@ -278,10 +354,20 @@ interface CustomerServiceApi {
 
 	@GET
 	@Path("{id}/duplicates")
-	public DomainPage<Customer> retrieveDuplicates(
+	public CustomerDuplicates retrieveDuplicates(
 			@PathParam("id") final Integer id);
+
+	@GET
+	@Path("/duplicates")
+	public DomainPage<CustomerDuplicates> retrieveDuplicates(
+			@QueryParam("page") final Integer page,
+			@QueryParam("count") final Integer count);
 
 	@POST
 	@Path("/duplicates/index")
-	public Response createIndex();
+	public Response createIndex(
+			@QueryParam("sync") @DefaultValue("false") final Boolean sync);
+
+	@DELETE
+	public Response deleteAll();
 }

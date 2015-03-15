@@ -51,7 +51,7 @@ public class DozerConfiguration {
 
 				mapping(CustomerJpa.class, CustomerDuplicates.class,
 						TypeMappingOptions.oneWay(),
-						TypeMappingOptions.mapNull(true));
+						TypeMappingOptions.mapNull(true)).exclude("duplicates");
 			}
 		};
 

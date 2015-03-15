@@ -54,6 +54,11 @@ public class CustomerController extends BaseCustomerController {
 		return domain;
 	}
 
+	@Transactional
+	public void deleteAll() {
+		customerJpaRepo.deleteAll();
+	}
+
 	private Customer save(CustomerJpa entity) {
 		entity = customerJpaRepo.save(entity);
 

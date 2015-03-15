@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -83,6 +84,12 @@ public class CustomerService {
 		return customerController.delete(id);
 	}
 
+	@DELETE
+	public Response deleteAll() {
+		customerController.deleteAll();
+		return Response.ok().build();
+	}
+
 	@GET
 	@Path("{id}/duplicates")
 	public CustomerDuplicates retrieveDuplicates(
@@ -100,9 +107,10 @@ public class CustomerService {
 
 	@POST
 	@Path("/duplicates/index")
-	public Response createIndex() {
+	public Response createIndex(
+			@QueryParam("sync") @DefaultValue("false") final Boolean sync) {
 		final CustomerDuplicatesIndex indexDuplicates = customerDuplicatesController
-				.indexDuplicates();
+				.indexDuplicates(sync);
 		return Response.accepted(indexDuplicates).build();
 	}
 

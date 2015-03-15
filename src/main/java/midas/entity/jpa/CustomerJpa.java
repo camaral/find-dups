@@ -15,10 +15,15 @@
  */
 package midas.entity.jpa;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 /**
@@ -36,6 +41,12 @@ public class CustomerJpa {
 	private String firstName;
 	@Column(name = "LAST_NAME")
 	private String lastName;
+
+	@JoinTable(name = "CUSTOMER_DUPLICATES", //
+	joinColumns = { @JoinColumn(name = "CUSTOMER_ID", referencedColumnName = "id", nullable = false) }, //
+	inverseJoinColumns = { @JoinColumn(name = "DUPLICATE_ID", referencedColumnName = "id", nullable = false) })
+	@ManyToMany
+	private List<CustomerJpa> duplicates;
 
 	/**
 	 * @return the id
@@ -81,4 +92,26 @@ public class CustomerJpa {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
+
+	/**
+	 * @param duplicates
+	 *            the duplicates to set
+	 */
+	public void setDuplicates(List<CustomerJpa> duplicates) {
+		this.duplicates = duplicates;
+	}
+
+	/**
+	 * @return the duplicates
+	 */
+	public List<CustomerJpa> getDuplicates() {
+		return duplicates;
+	}
+
+	@Override
+	public String toString() {
+		return "CustomerJpa [id=" + id + ", firstName=" + firstName
+				+ ", lastName=" + lastName + "]";
+	}
+
 }
