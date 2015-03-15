@@ -69,7 +69,7 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 	private CustomerDuplicatesListJpaRepository customerDuplicatesListJpaRepo;
 
 	@Transactional(readOnly = true)
-	public DomainPage<Customer> retrieveDuplicates(final Integer id) {
+	public CustomerDuplicates retrieveDuplicates(final Integer id) {
 		final CustomerJpa entity = findEntity(id);
 		final Pageable page = new SolrPageRequest(0, MAX_DUPLICATES);
 
@@ -77,7 +77,11 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 				.findMoreLikeThis(id, entity.getFirstName(),
 						entity.getLastName(), page);
 
-		return mapToDomain(duplicates);
+		CustomerDuplicates domain = new CustomerDuplicates();
+		// domain.setCustomer(mapToDomain(entity));
+		domain.setDuplicates(mapToDomain(duplicates).getItems());
+
+		return domain;
 	}
 
 	@Transactional
@@ -133,6 +137,11 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 		}
 	}
 
+	protected CustomerDuplicates mapToCustomerDuplicates(
+			final CustomerJpa entity) {
+		return mapper.map(entity, CustomerDuplicates.class);
+	}
+
 	private DomainPage<Customer> mapToDomain(final Page<CustomerSolr> documents) {
 		final List<Customer> domainList = new ArrayList<>();
 		for (CustomerSolr doc : documents) {
@@ -146,8 +155,8 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 			final Page<CustomerDuplicatesJpa> entities) {
 		final List<CustomerDuplicates> domainList = new ArrayList<>();
 		for (final CustomerDuplicatesJpa entity : entities) {
-			final CustomerDuplicates customerDuplicates = new CustomerDuplicates();
-			customerDuplicates.setCustomer(mapToDomain(entity.getCustomer()));
+			final CustomerDuplicates customerDuplicates = mapToCustomerDuplicates(entity
+					.getCustomer());
 
 			final List<Customer> duplicates = new ArrayList<>();
 

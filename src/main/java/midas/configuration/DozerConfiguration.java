@@ -16,6 +16,7 @@
 package midas.configuration;
 
 import midas.domain.Customer;
+import midas.domain.CustomerDuplicates;
 import midas.entity.jpa.CustomerJpa;
 import midas.entity.solr.CustomerSolr;
 
@@ -45,6 +46,10 @@ public class DozerConfiguration {
 						TypeMappingOptions.mapNull(true));
 
 				mapping(CustomerJpa.class, Customer.class,
+						TypeMappingOptions.oneWay(),
+						TypeMappingOptions.mapNull(true));
+
+				mapping(CustomerJpa.class, CustomerDuplicates.class,
 						TypeMappingOptions.oneWay(),
 						TypeMappingOptions.mapNull(true));
 			}

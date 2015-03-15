@@ -33,24 +33,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class CustomerDuplicates {
-	public Customer customer;
+public class CustomerDuplicates extends Customer {
 	public List<Customer> duplicates;
-
-	/**
-	 * @return the customer
-	 */
-	public Customer getCustomer() {
-		return customer;
-	}
-
-	/**
-	 * @param customer
-	 *            the customer to set
-	 */
-	public void setCustomer(Customer customer) {
-		this.customer = customer;
-	}
 
 	/**
 	 * @return the duplicates

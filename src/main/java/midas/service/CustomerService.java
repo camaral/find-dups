@@ -85,14 +85,15 @@ public class CustomerService {
 
 	@GET
 	@Path("{id}/duplicates")
-	public DomainPage<Customer> retrieveDuplicates(
+	public CustomerDuplicates retrieveDuplicates(
 			@PathParam("id") final Integer id) {
 		return customerDuplicatesController.retrieveDuplicates(id);
 	}
 
 	@GET
 	@Path("/duplicates")
-	public DomainPage<CustomerDuplicates> retrieveDuplicates(@QueryParam("page") final Integer page,
+	public DomainPage<CustomerDuplicates> retrieveDuplicates(
+			@QueryParam("page") final Integer page,
 			@QueryParam("count") final Integer count) {
 		return customerDuplicatesController.retrieveDuplicates(page, count);
 	}
