@@ -18,11 +18,8 @@ package midas.database;
 import java.util.Arrays;
 import java.util.Random;
 
-import midas.entity.jpa.CustomerDuplicatesJpa;
-import midas.entity.jpa.CustomerDuplicatesListJpa;
 import midas.entity.jpa.CustomerJpa;
 import midas.entity.solr.CustomerSolr;
-import midas.repository.jpa.CustomerDuplicatesJpaRepository;
 import midas.repository.jpa.CustomerJpaRepository;
 import midas.repository.solr.CustomerSolrRepository;
 import midas.testcategory.TryOut;
@@ -98,9 +95,6 @@ public class PopulateDatabase {
 	private CustomerJpaRepository customerJpaRepo;
 
 	@Autowired
-	private CustomerDuplicatesJpaRepository customerDuplicatesJpaRepo;
-
-	@Autowired
 	@Qualifier("customerMapper")
 	private Mapper customerMapper;
 
@@ -150,46 +144,36 @@ public class PopulateDatabase {
 
 	@Test
 	@Transactional
-	public void testCreateDuplicate() {
-		CustomerJpa customer = new CustomerJpa();
-		customer.setFirstName("caio");
-		customer.setLastName("amaral");
-		customer = customerJpaRepo.save(customer);
+	public void testFindDuplicates() {
+		CustomerJpa dupEntity = new CustomerJpa();
+		dupEntity.setFirstName("caio");
+		dupEntity.setLastName("amaral");
 
-		CustomerDuplicatesListJpa duplicate = new CustomerDuplicatesListJpa();
-		duplicate.setDuplicateId(1);
-		duplicate.setProbability(99);
+		dupEntity = customerJpaRepo.save(dupEntity);
 
-		CustomerDuplicatesJpa customerDuplicates = new CustomerDuplicatesJpa();
-		customerDuplicates.setCustomerId(customer.getId());
-		customerDuplicates.setHigherDuplicateProbability(99);
-		customerDuplicates.setDuplicates(Arrays.asList(duplicate));
-		customerDuplicates = customerDuplicatesJpaRepo.save(customerDuplicates);
+		CustomerJpa entity = new CustomerJpa();
+		entity.setFirstName("caio2");
+		entity.setLastName("amaral2");
+		entity.setDuplicates(Arrays.asList(dupEntity));
 
-		Assert.assertNotNull(customerDuplicates.getId());
+		entity = customerJpaRepo.save(entity);
 
-		customerDuplicates = customerDuplicatesJpaRepo.findOne(customerDuplicates.getId());
-		
-		Assert.assertNotNull(customerDuplicates.getDuplicates());
-		Assert.assertFalse(customerDuplicates.getDuplicates().isEmpty());
-		Assert.assertEquals(Integer.valueOf(1), customerDuplicates.getDuplicates().get(0).getDuplicateId());
-		
-	}
+		entity = new CustomerJpa();
+		entity.setFirstName("caio3");
+		entity.setLastName("amaral3");
 
-	@Test
-	@Transactional
-	public void testFindDuplicateList() {
-		final Pageable pageable = new PageRequest(0,
-				10);
+		entity = customerJpaRepo.save(entity);
 
-		Page<CustomerDuplicatesJpa> findAll = customerDuplicatesJpaRepo.findAll(pageable);
-		
-		for (CustomerDuplicatesJpa customerDuplicates : findAll) {
-			Assert.assertNotNull(customerDuplicates.getDuplicates());
-			Assert.assertFalse(customerDuplicates.getDuplicates().isEmpty());
-			Assert.assertNotNull(customerDuplicates.getDuplicates().get(0).getDuplicateId());
-			Assert.assertNotNull(customerDuplicates.getDuplicates().get(0).getDuplicate());
-			Assert.assertNotNull(customerDuplicates.getDuplicates().get(0).getDuplicate().getFirstName());
-		}
+		PageRequest pageable = new PageRequest(0, 2);
+		Page<CustomerJpa> findDuplicates = customerJpaRepo
+				.findDuplicates(pageable);
+		Assert.assertEquals(1l, findDuplicates.getTotalElements());
+
+		CustomerJpa customer = findDuplicates.getContent().get(0);
+
+		Assert.assertEquals(2, customer.getId().intValue());
+		Assert.assertEquals(1, customer.getDuplicates().size());
+		Assert.assertEquals(1, customer.getDuplicates().get(0).getId()
+				.intValue());
 	}
 }
