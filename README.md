@@ -37,6 +37,58 @@ $ ./bin/solr create -c customer;
 $ cd ~/find-dups
 $ mvn jetty:run
 ```
-- Import the project on eclipse and execute the junit test midas.service.CustomerServiceTest . You can check the interface at the end of the test for a reference of what services were implemented.
- 
- 
+- Import the maven project on eclipse and execute the junit test **midas.service.CustomerServiceTest**. You can check the interface at the end of the test for a reference of what services were implemented.
+
+##API reference
+I implemented a very simple **Customer** domain. It only has firstName and LastName. With just those two fields I can show how the application will find similar customers no matter the case of the letters, the order of the names and the number of names. Also, the duplicates are returned in order, with the most similar in the first position.
+
+###CRUD methods
+The CRUD methods are pretty straightforward.
+
+####Create 
+```bash
+$ curl -v "http://localhost:9095/customers/" -d "{\"firstName\":\"Caio\", \"lastName\":\"Amaral\"}" -H "Content-Type: application/json" -H "Accept: application/json"
+> POST /customers/ HTTP/1.1
+> User-Agent: curl/7.38.0
+> Host: localhost:9095
+> Content-Type: application/json
+> Accept: application/json
+> Content-Length: 41
+>
+< HTTP/1.1 201 Created
+< Content-Type: application/json
+< Location: http://localhost:9095/customers/1
+< Transfer-Encoding: chunked
+< Server: Jetty(6.1.15)
+<
+{"id":1,"firstName":"Caio","lastName":"Amaral"}
+
+```
+
+####Retrieve
+```bash
+$ curl -v "http://localhost:9095/customers/1" -H "Accept: application/json"
+> GET /customers/1 HTTP/1.1
+> User-Agent: curl/7.38.0
+> Host: localhost:9095
+> Accept: application/json
+>
+< HTTP/1.1 200 OK
+< Content-Type: application/json
+< Transfer-Encoding: chunked
+< Server: Jetty(6.1.15)
+<
+{"id":1,"firstName":"Caio","lastName":"Amaral"}
+```
+
+####Update
+```bash
+$ curl  "http://localhost:9095/customers/1" -X PUT -d "{\"firstName\":\"Kyle\", \"lastName\":\"Amaral\"}" -H "Content-Type: application/json" -H "Accept: application/json"
+{"id":1,"firstName":"Kyle","lastName":"Amaral"}
+```
+
+####Delete
+```bash
+$ curl  "http://localhost:9095/customers/1" -X DELETE -H "Accept: application/json"
+{"id":1,"firstName":"Kyle","lastName":"Amaral"}
+```
