@@ -20,6 +20,7 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 import midas.domain.Customer;
+import midas.domain.CustomerDuplicatesIndex;
 import midas.domain.CustomerDuplicatesIndexingPage;
 import midas.domain.DomainPage;
 import midas.entity.jpa.CustomerJpa;
@@ -65,7 +66,10 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 		return mapToDomain(duplicates);
 	}
 
-	public void indexDuplicates() {
+	public CustomerDuplicatesIndex indexDuplicates() {
+		// TODO: Would be nice to prevent multiples calls while the indexing is
+		// executing. Save lock, indexing execution status, number of executed
+		// pages and total pages
 		final int count = (int) customerJpaRepo.count();
 		final int numPages = (count / INDEX_PAGE_SIZE) + 1;
 
@@ -80,6 +84,8 @@ public class CustomerDuplicatesController extends BaseCustomerController {
 				}
 			});
 		}
+
+		return new CustomerDuplicatesIndex(numPages, INDEX_PAGE_SIZE);
 	}
 
 	@JmsListener(destination = INDEX_QUEUE_NAME)

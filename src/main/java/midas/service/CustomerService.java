@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response;
 import midas.controller.CustomerController;
 import midas.controller.CustomerDuplicatesController;
 import midas.domain.Customer;
+import midas.domain.CustomerDuplicatesIndex;
 import midas.domain.DomainPage;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,8 +97,9 @@ public class CustomerService {
 	@POST
 	@Path("/duplicates/index")
 	public Response createIndex() {
-		customerDuplicatesController.indexDuplicates();
-		return Response.accepted().build();
+		final CustomerDuplicatesIndex indexDuplicates = customerDuplicatesController
+				.indexDuplicates();
+		return Response.accepted(indexDuplicates).build();
 	}
 
 	@GET

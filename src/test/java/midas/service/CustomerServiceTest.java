@@ -29,7 +29,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import midas.domain.Customer;
+import midas.domain.CustomerDuplicatesIndex;
 import midas.domain.DomainPage;
+import midas.domain.IndexStatus;
 import midas.testcategory.Integration;
 
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
@@ -238,6 +240,19 @@ public class CustomerServiceTest {
 			System.out.println(dup);
 		}
 	}
+
+	@Test
+	public void testCreateIndex() {
+		final Response response = customerService.createIndex();
+		Assert.assertEquals(202, response.getStatus());
+
+		final CustomerDuplicatesIndex duplicatesIndex = response
+				.readEntity(CustomerDuplicatesIndex.class);
+
+		Assert.assertNotNull(duplicatesIndex.getPages());
+		Assert.assertEquals(Integer.valueOf(10), duplicatesIndex.getCount());
+		Assert.assertEquals(IndexStatus.EXECUTING, duplicatesIndex.getStatus());
+	}
 }
 
 @Path("customers")
@@ -265,4 +280,8 @@ interface CustomerServiceApi {
 	@Path("{id}/duplicates")
 	public DomainPage<Customer> retrieveDuplicates(
 			@PathParam("id") final Integer id);
+
+	@POST
+	@Path("/duplicates/index")
+	public Response createIndex();
 }
