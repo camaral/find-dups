@@ -13,12 +13,12 @@ What is used in the implementation
 ###Aplications
 - **Derby:** Database.
 - **ActiveMQ:** To provide queues for asynchronous processing. It make it easy to scale the batch processing.
-- **Solr:** Solr is the main part of the de-duplication. Provides lots of searching features (MoreLikeThis, GeoSearch, Terms frequency and relevancy) and can be configured to achieve the desired precision. It also can scale.
+- **Solr:** Solr is the main part of the de-duplication. Provides lots of searching features and can be configured to achieve the desired precision. It also can scale.
 
 I configured both Derby and ActiveMQ embedded to make it easy to test the project. I decided to not embed Solr because it is to big to keep inside the project.
 
 
-##How to execute
+##Starting the engine
 Sadly I am using Windows here, let me know in case of any problems with these steps
 
 ###Starting solr
@@ -38,8 +38,8 @@ $ mvn jetty:run
 ```
 - Import the maven project on eclipse and execute the junit test **midas.service.CustomerServiceTest**. You can check the interface at the end of the test for a reference of what services were implemented.
 
-##API reference
-I implemented a very simple **Customer** domain. It only has firstName and LastName. With just those two fields I can show how the application will find similar customers no matter the case of the letters, the order of the names and the number of names. Also, the duplicates are returned in order, with the most similar in the first position.
+##Paintshop
+I implemented a very simple **Customer** domain. It only has firstName and LastName. With just those two fields I can show how the application will find similar customers no matter the case of the letters, the order of the names and the number of names. Also, the duplicates are returned in order, with the most similar in the first position. Following is the API Reference.
 
 ###CRUD methods
 The CRUD methods are pretty straightforward. Creating or updating a customer save it in both on Database and Solr. Deleting the customer also removes from both storages. In the future, it would be nice to implement a batch job to re-index the Solr documents, to prevent eventual inconsistencies.
@@ -138,3 +138,6 @@ $ curl  "http://localhost:9095/customers/duplicates?page=0&count=10" -H "Accept:
    ]
 }
 ```
+
+##Road trip
+The next steps are to add more fields to the customer and test some Solr search(MoreLikeThis, GeoSearch, Terms frequency and relevancy).
