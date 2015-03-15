@@ -42,9 +42,9 @@ $ mvn jetty:run
 I implemented a very simple **Customer** domain. It only has firstName and LastName. With just those two fields I can show how the application will find similar customers no matter the case of the letters, the order of the names and the number of names. Also, the duplicates are returned in order, with the most similar in the first position.
 
 ###CRUD methods
-The CRUD methods are pretty straightforward.
+The CRUD methods are pretty straightforward. Creating or updating a customer save it in both on Database and Solr. Deleting the customer also removes from both storages. In the future, it would be nice to implement a batch job to re-index the Solr documents, to prevent eventual inconsistencies.
 
-####Create 
+####Create
 ```bash
 $ curl -v "http://localhost:9095/customers/" -d "{\"firstName\":\"Caio\", \"lastName\":\"Amaral\"}" -H "Content-Type: application/json" -H "Accept: application/json"
 > POST /customers/ HTTP/1.1
@@ -91,3 +91,6 @@ $ curl  "http://localhost:9095/customers/1" -X PUT -d "{\"firstName\":\"Kyle\", 
 $ curl  "http://localhost:9095/customers/1" -X DELETE -H "Accept: application/json"
 {"id":1,"firstName":"Kyle","lastName":"Amaral"}
 ```
+
+###Duplicates
+Checking for duplicates is available in two flavours. First, you can get the duplicates directly from one customer; in this case, the search is made on the fly, returning up to 5 results. The second option is to list all customers that may have duplicates; for that to work, first is necessary to indexing all the customers, that is, to look for duplicates for every existent customer. I implemented the index as a REST service, so testing is easy. In the future it can also be an scheduled process.
