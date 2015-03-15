@@ -51,12 +51,14 @@ public class CustomerController extends BaseCustomerController {
 	public Customer delete(final Integer id) {
 		final Customer domain = find(id);
 		customerJpaRepo.delete(id);
+		customerSolrRepo.delete(id);
 		return domain;
 	}
 
 	@Transactional
 	public void deleteAll() {
 		customerJpaRepo.deleteAll();
+		customerSolrRepo.deleteAll();
 	}
 
 	private Customer save(CustomerJpa entity) {
