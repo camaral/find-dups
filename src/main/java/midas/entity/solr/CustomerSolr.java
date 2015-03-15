@@ -91,4 +91,10 @@ public class CustomerSolr {
 		this.lastName = lastName;
 	}
 
+	@Override
+	public String toString() {
+		return "CustomerSolr [id=" + id + ", firstName=" + firstName
+				+ ", lastName=" + lastName + "]";
+	}
+
 }
