@@ -5,25 +5,25 @@
 What is used in the implementation
 
 ###Frameworks
-- **Spring:** For dependency inject. I created almost everything with annotations. I kept as xml when it was easier this way.
+- **Spring:** For dependency inject. Almost everything was created with annotations. I kept as XML when it was simpler this way.
 - **Resteasy:** For REST API implementation and resteasy-client with proxy to write the tests.
-- **Spring-Data:** To access database and solr.
-- **Dozer:** For java bean mapping between domain and entity objects
+- **Spring-Data:** To access Database and Solr.
+- **Dozer:** For java bean mapping between domain and entity objects.
 
 ###Aplications
-- **Derby:** Database.
-- **ActiveMQ:** To provide queues for asynchronous processing. It make it easy to scale the batch processing.
-- **Solr:** Solr is the main part of the de-duplication. Provides lots of searching features and can be configured to achieve the desired precision. It also can scale.
+- **Derby:** An super easy to setup Database.
+- **ActiveMQ:** To provide queues for asynchronous processing. This way we can scale the batch processing.
+- **Solr:** The main part of the de-duplication. Provides lots of searching features and can be configured to achieve the desired precision. It also can scale.
 
-I configured both Derby and ActiveMQ embedded to make it easy to test the project. I decided to not embed Solr because it is to big to keep inside the project.
+I configured both Derby and ActiveMQ embedded to simplify the project testing and development. Solr was not embedded because it is to big to keep inside the project.
 
 
 ##Starting the engine
-Sadly I am using Windows here, let me know in case of any problems with these steps
+Sadly I am using Windows here, let me know in case of any problems with these steps.
 
 ###Starting solr
 - Download it from http://www.apache.org/dyn/closer.cgi/lucene/solr/5.0.0
-- Unzip it, lets say inside /opt/solr/, start it and create the solr core`
+- Unzip it, lets say, inside /opt/solr/, start it and create the solr core`
 ```bash
 $ cd /opt/solr/
 $./bin/solr start -p 8983
@@ -31,15 +31,17 @@ $ ./bin/solr create -c customer;
 ```
  
 ###Executing find-dups
-- Clone the repo or download the zip from https://github.com/camaral1/find-dups , lets say inside ~/find-dups/ and start the application.
+- Clone the repo or download the zip from https://github.com/camaral1/find-dups. Put it inside ~/find-dups/ (or any other path) and start the application.
 ```bash
 $ cd ~/find-dups
 $ mvn jetty:run
 ```
-- Import the maven project on eclipse and execute the junit test **midas.service.CustomerServiceTest**. You can check the interface at the end of the test for a reference of what services were implemented.
+- Import the Maven project on Eclipse and execute the junit test  **midas.service.CustomerServiceTest** You can check the interface at the end of the test for a reference of what services were implemented.
 
 ##Paintshop
-I implemented a very simple **Customer** domain. It only has firstName and LastName. With just those two fields I can show how the application will find similar customers no matter the case of the letters, the order of the names and the number of names. Also, the duplicates are returned in order, with the most similar in the first position. Following is the API Reference.
+I implemented a very simple **Customer** domain. It only has firstName and LastName. With just those two fields I can show how the application will find similar customers no matter the case of the letters, the order of the names and the number of names. Also, the duplicates are returned in order, with the most similar in the first position.
+
+Following is the API Reference.
 
 ###CRUD methods
 The CRUD methods are pretty straightforward. Creating or updating a customer save it in both on Database and Solr. Deleting the customer also removes from both storages.
@@ -93,12 +95,17 @@ $ curl  "http://localhost:9095/customers/1" -X DELETE -H "Accept: application/js
 ```
 
 ###Duplicates
-Checking for duplicates is available in two flavours, both returns up to 5 results. First, you can get the duplicates directly from one customer; in this case, the search is made on the fly. The second option is to list all customers that may have duplicates; for that to work, first is necessary to indexing all the customers, that is, to look for duplicates for every existent customer. I implemented the index as a REST service, so testing is easy. In the future it can also be an scheduled process.
+Checking for duplicates is available in two flavours, both returns up to 5 results. First, you can get the duplicates directly from one customer; in this case, the search is made on the fly. The second option is to list all customers that may have duplicates; for that to work, first is necessary to indexing all the customers, that is, to look for duplicates for every existent customer and save it in the Database. The index was implemented as a REST service to enable easy testing; in the future it can also be a scheduled process.
 
-####Retrieve possible duplicates from one customer
+####Retrieve possible duplicates from one single customer
 ```bash
 $ curl  "http://localhost:9095/customers/21/duplicates/" -H "Accept: application/json"
-{"duplicates":[{"id":22,"firstName":"Caio","lastName":"Brandao Amaral"},{"id":20,"firstName":"Kyle","lastName":"Amaral"}]}
+{
+   "duplicates":[
+      { "id":22,"firstName":"Caio","lastName":"Brandao Amaral"},
+      {"id":20,"firstName":"Kyle","lastName":"Amaral"}
+   ]
+}
 ```
 
 ####Retrieve all possible duplicates
@@ -140,9 +147,10 @@ $ curl  "http://localhost:9095/customers/duplicates?page=0&count=10" -H "Accept:
 ```
 
 ##Road trip
-The project was build with scalability in mind, and Solr is returning good results even with no configuration. So with some improvements it will be ready to deploy in production. The next steps are:
+The project was build with scalability in mind and Solr is returning good results even with no configuration. So with some improvements it will be ready to deploy in production. The next steps are:
 - Add more fields to the customer 
 - Test some Solr search features: MoreLikeThis, GeoSearch, Terms frequency, Word processing(Stop words, Stemming etc), Highlights
 - It would be nice to implement a mechanism to prevent eventual inconsistencies between Database and Solr
 - Create a real Database, create all the SQL scripts and improve the model to hold more information about the duplicates (e.g. probalility of been a duplicate)
 - Externalize configurations
+- Create scheduled process to re-index the duplicates
