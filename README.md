@@ -42,7 +42,7 @@ $ mvn jetty:run
 I implemented a very simple **Customer** domain. It only has firstName and LastName. With just those two fields I can show how the application will find similar customers no matter the case of the letters, the order of the names and the number of names. Also, the duplicates are returned in order, with the most similar in the first position. Following is the API Reference.
 
 ###CRUD methods
-The CRUD methods are pretty straightforward. Creating or updating a customer save it in both on Database and Solr. Deleting the customer also removes from both storages. In the future, it would be nice to implement a batch job to re-index the Solr documents, to prevent eventual inconsistencies.
+The CRUD methods are pretty straightforward. Creating or updating a customer save it in both on Database and Solr. Deleting the customer also removes from both storages.
 
 ####Create
 ```bash
@@ -140,4 +140,9 @@ $ curl  "http://localhost:9095/customers/duplicates?page=0&count=10" -H "Accept:
 ```
 
 ##Road trip
-The next steps are to add more fields to the customer and test some Solr search(MoreLikeThis, GeoSearch, Terms frequency and relevancy).
+The project was build with scalability in mind, and Solr is returning good results even with no configuration. So with some improvements it will be ready to deploy in production. The next steps are:
+- Add more fields to the customer 
+- Test some Solr search features: MoreLikeThis, GeoSearch, Terms frequency, Word processing(Stop words, Stemming etc), Highlights
+- It would be nice to implement a mechanism to prevent eventual inconsistencies between Database and Solr
+- Create a real Database, create all the SQL scripts and improve the model to hold more information about the duplicates (e.g. probalility of been a duplicate)
+- Externalize configurations
