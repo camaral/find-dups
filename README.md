@@ -95,7 +95,7 @@ $ curl  "http://localhost:9095/customers/1" -X DELETE -H "Accept: application/js
 ```
 
 ###Duplicates
-Checking for duplicates is available in two flavours, both returns up to 5 results. First, you can get the duplicates directly from one customer; in this case, the search is made on the fly. The second option is to list all customers that may have duplicates; for that to work, first is necessary to indexing all the customers, that is, to look for duplicates for every existent customer and save it in the Database. The index was implemented as a REST service to enable easy testing; in the future it can also be a scheduled process.
+Checking for duplicates is available in two flavours, both returns up to 5 results. First, you can get the duplicates directly from one customer; in this case, the search is made on the fly. The second option is to list all customers that may have duplicates; for that to work, first is necessary to index all the customers, that is, to look for duplicates for every existent customer and save it in the Database. The index was implemented as a REST service to enable easy testing; in the future it can also be a scheduled process.
 
 ####Retrieve possible duplicates from one single customer
 ```bash
@@ -151,6 +151,6 @@ The project was build with scalability in mind and Solr is returning good result
 - Add more fields to the customer 
 - Test some Solr search features: MoreLikeThis, GeoSearch, Terms frequency, Word processing(Stop words, Stemming etc), Highlights
 - It would be nice to implement a mechanism to prevent eventual inconsistencies between Database and Solr
-- Create a real Database, create all the SQL scripts and improve the model to hold more information about the duplicates (e.g. probalility of been a duplicate)
+- Create a real Database, create all the SQL scripts and improve the model to hold more information about the duplicates (e.g. probalility of being a duplicate)
 - Externalize configurations
 - Create scheduled process to re-index the duplicates
