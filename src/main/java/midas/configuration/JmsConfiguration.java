@@ -57,8 +57,7 @@ public class JmsConfiguration {
 
 	@Bean
 	public JmsTemplate jmsTemplate() {
-		final JmsTemplate template = new JmsTemplate(jmsConnectionFactory());
-		return template;
+		return new JmsTemplate(jmsConnectionFactory());
 	}
 
 }

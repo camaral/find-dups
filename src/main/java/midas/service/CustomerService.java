@@ -61,10 +61,10 @@ public class CustomerService extends BaseCustomerService {
 		customerSolrRepo.deleteAll();
 	}
 
-	private Customer save(CustomerJpa entity) {
-		entity = customerJpaRepo.save(entity);
+	private Customer save(final CustomerJpa entity) {
+		final CustomerJpa savedEntity = customerJpaRepo.save(entity);
 
-		final Customer domain = mapToDomain(entity);
+		final Customer domain = mapToDomain(savedEntity);
 
 		final CustomerSolr document = mapToSolr(domain);
 		customerSolrRepo.save(document);

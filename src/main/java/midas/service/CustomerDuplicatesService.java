@@ -69,7 +69,6 @@ public class CustomerDuplicatesService extends BaseCustomerService {
 						entity.getLastName(), page);
 
 		CustomerDuplicates domain = new CustomerDuplicates();
-		// domain.setCustomer(mapToDomain(entity));
 		domain.setDuplicates(mapToDomain(duplicates).getItems());
 
 		return domain;
@@ -88,9 +87,6 @@ public class CustomerDuplicatesService extends BaseCustomerService {
 
 	@Transactional
 	public CustomerDuplicatesIndex indexDuplicates(final Boolean sync) {
-		// TODO: Would be nice to prevent multiples calls while the indexing is
-		// executing. Save lock, indexing execution status, number of executed
-		// pages and total pages
 		final int count = (int) customerJpaRepo.count();
 		final int numPages = (count / INDEX_PAGE_SIZE) + 1;
 
@@ -110,8 +106,8 @@ public class CustomerDuplicatesService extends BaseCustomerService {
 		}
 
 		return new CustomerDuplicatesIndex(numPages, INDEX_PAGE_SIZE,
-				(Boolean.TRUE.equals(sync) ? IndexStatus.FINISHED
-						: IndexStatus.EXECUTING));
+				Boolean.TRUE.equals(sync) ? IndexStatus.FINISHED
+						: IndexStatus.EXECUTING);
 	}
 
 	@Transactional
