@@ -16,6 +16,6 @@
 	<tx:annotation-driven/>
 	<context:annotation-config/>
 
-	<context:component-scan base-package="midas.configuration, midas.service, midas.controller, midas.processor"/>
+	<context:component-scan base-package="midas.configuration, midas.service, midas.resource"/>
 
 </beans>

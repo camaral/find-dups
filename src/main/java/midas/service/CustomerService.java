@@ -15,110 +15,60 @@
  */
 package midas.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import midas.controller.CustomerController;
-import midas.controller.CustomerDuplicatesController;
 import midas.domain.Customer;
-import midas.domain.CustomerDuplicates;
-import midas.domain.CustomerDuplicatesIndex;
-import midas.domain.DomainPage;
+import midas.entity.jpa.CustomerJpa;
+import midas.entity.solr.CustomerSolr;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author caio.amaral
  *
  */
 @Service
-@Path("customers")
-@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-public class CustomerService {
+public class CustomerService extends BaseCustomerService {
 
-	@Autowired
-	private CustomerController customerController;
-
-	@Autowired
-	private CustomerDuplicatesController customerDuplicatesController;
-
-	@POST
-	public Response create(final Customer customer) throws URISyntaxException {
-		final Customer created = customerController.create(customer);
-
-		return Response.created(new URI("/customers/" + created.getId()))
-				.entity(created).build();
+	@Transactional
+	public Customer create(final Customer customer) {
+		final CustomerJpa entity = mapToEntity(customer);
+		return save(entity);
 	}
 
-	@GET
-	@Path("{id}")
-	public Customer retrieve(@PathParam("id") final Integer id) {
-		return customerController.retrieve(id);
+	@Transactional(readOnly = true)
+	public Customer retrieve(final Integer id) {
+		return find(id);
 	}
 
-	@PUT
-	@Path("{id}")
-	public Customer update(@PathParam("id") final Integer id,
-			final Customer customer) {
-		return customerController.update(id, customer);
+	@Transactional
+	public Customer update(final Integer id, final Customer customer) {
+		final CustomerJpa entity = findEntity(id);
+		mapToEntity(customer, entity);
+		return save(entity);
 	}
 
-	@DELETE
-	@Path("{id}")
-	public Customer delete(@PathParam("id") final Integer id) {
-		return customerController.delete(id);
+	@Transactional
+	public Customer delete(final Integer id) {
+		final Customer domain = find(id);
+		customerJpaRepo.delete(id);
+		customerSolrRepo.delete(id);
+		return domain;
 	}
 
-	@DELETE
-	public Response deleteAll() {
-		customerController.deleteAll();
-		return Response.ok().build();
+	@Transactional
+	public void deleteAll() {
+		customerJpaRepo.deleteAll();
+		customerSolrRepo.deleteAll();
 	}
 
-	@GET
-	@Path("{id}/duplicates")
-	public CustomerDuplicates retrieveDuplicates(
-			@PathParam("id") final Integer id) {
-		return customerDuplicatesController.retrieveDuplicates(id);
-	}
+	private Customer save(CustomerJpa entity) {
+		entity = customerJpaRepo.save(entity);
 
-	@GET
-	@Path("/duplicates")
-	public DomainPage<CustomerDuplicates> retrieveDuplicates(
-			@QueryParam("page") final Integer page,
-			@QueryParam("count") final Integer count) {
-		return customerDuplicatesController.retrieveDuplicates(page, count);
-	}
+		final Customer domain = mapToDomain(entity);
 
-	@POST
-	@Path("/duplicates/index")
-	public Response createIndex(
-			@QueryParam("sync") @DefaultValue("false") final Boolean sync) {
-		final CustomerDuplicatesIndex indexDuplicates = customerDuplicatesController
-				.indexDuplicates(sync);
-		return Response.accepted(indexDuplicates).build();
-	}
+		final CustomerSolr document = mapToSolr(domain);
+		customerSolrRepo.save(document);
 
-	@GET
-	@Path("/duplicates/index")
-	public Response retriveIndex() {
-		// TODO: return indexing execution status, number of executed pages and
-		// total pages
-		return Response.serverError().build();
+		return domain;
 	}
 }

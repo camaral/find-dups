@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package midas.controller;
+package midas.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,17 +40,17 @@ import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author caio.amaral
  *
  */
-@Controller
-public class CustomerDuplicatesController extends BaseCustomerController {
+@Service
+public class CustomerDuplicatesService extends BaseCustomerService {
 	private static final Logger LOGGER = Logger
-			.getLogger(CustomerDuplicatesController.class);
+			.getLogger(CustomerDuplicatesService.class);
 
 	private static final int MAX_DUPLICATES = 5;
 	private static final String INDEX_QUEUE_NAME = "qIndexDuplicates";

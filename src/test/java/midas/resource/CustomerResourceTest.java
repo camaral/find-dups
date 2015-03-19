@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package midas.service;
+package midas.resource;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -55,9 +55,9 @@ import org.junit.experimental.categories.Category;
  *
  */
 @Category(Integration.class)
-public class CustomerServiceTest {
+public class CustomerResourceTest {
 
-	private static CustomerServiceApi customerService;
+	private static CustomerResourceApi customerResource;
 
 	@BeforeClass
 	public static void setup() {
@@ -65,7 +65,7 @@ public class CustomerServiceTest {
 		final ResteasyWebTarget target = client
 				.target("http://localhost:9095/");
 
-		customerService = target.proxy(CustomerServiceApi.class);
+		customerResource = target.proxy(CustomerResourceApi.class);
 	}
 
 	@Before
@@ -75,7 +75,7 @@ public class CustomerServiceTest {
 
 		solrServer.deleteByQuery("*:*");
 
-		Response deleteAll = customerService.deleteAll();
+		Response deleteAll = customerResource.deleteAll();
 		Assert.assertEquals(200, deleteAll.getStatus());
 		deleteAll.close();
 	}
@@ -86,7 +86,7 @@ public class CustomerServiceTest {
 		customer.setFirstName("caio");
 		customer.setLastName("amaral");
 
-		Response response = customerService.create(customer);
+		Response response = customerResource.create(customer);
 
 		Assert.assertEquals(201, response.getStatus());
 		Assert.assertNotNull(response.getHeaderString(HttpHeaders.LOCATION));
@@ -104,12 +104,12 @@ public class CustomerServiceTest {
 		customer.setFirstName("Caio");
 		customer.setLastName("Amaral");
 
-		Response response = customerService.create(customer);
+		Response response = customerResource.create(customer);
 		Customer created = response.readEntity(Customer.class);
 
 		Assert.assertNotNull(created.getId());
 
-		Customer found = customerService.retrieve(created.getId());
+		Customer found = customerResource.retrieve(created.getId());
 
 		Assert.assertEquals(created.getId(), found.getId());
 		Assert.assertEquals("Caio", found.getFirstName());
@@ -122,7 +122,7 @@ public class CustomerServiceTest {
 		customer.setFirstName("Caio");
 		customer.setLastName("Amaral");
 
-		Response response = customerService.create(customer);
+		Response response = customerResource.create(customer);
 		Customer created = response.readEntity(Customer.class);
 
 		Integer id = created.getId();
@@ -130,13 +130,13 @@ public class CustomerServiceTest {
 		Assert.assertNotNull(id);
 
 		created.setFirstName("Kyle");
-		Customer updated = customerService.update(id, created);
+		Customer updated = customerResource.update(id, created);
 
 		Assert.assertEquals(id, updated.getId());
 		Assert.assertEquals("Kyle", updated.getFirstName());
 		Assert.assertEquals("Amaral", updated.getLastName());
 
-		Customer found = customerService.retrieve(id);
+		Customer found = customerResource.retrieve(id);
 
 		Assert.assertEquals(id, found.getId());
 		Assert.assertEquals("Kyle", found.getFirstName());
@@ -149,30 +149,30 @@ public class CustomerServiceTest {
 		customer.setFirstName("Caio");
 		customer.setLastName("Amaral");
 
-		Response response = customerService.create(customer);
+		Response response = customerResource.create(customer);
 		Customer created = response.readEntity(Customer.class);
 
 		Integer id = created.getId();
 
 		Assert.assertNotNull(id);
 
-		Customer deleted = customerService.delete(id);
+		Customer deleted = customerResource.delete(id);
 
 		Assert.assertEquals(created.getId(), deleted.getId());
 		Assert.assertEquals("Caio", deleted.getFirstName());
 		Assert.assertEquals("Amaral", deleted.getLastName());
 
-		customerService.delete(id);
+		customerResource.delete(id);
 	}
 
 	@Test(expected = NotFoundException.class)
 	public void testRetrieveNotFound() {
-		customerService.retrieve(-10);
+		customerResource.retrieve(-10);
 	}
 
 	@Test(expected = NotFoundException.class)
 	public void testUpdateNotFound() {
-		customerService.update(-10, new Customer());
+		customerResource.update(-10, new Customer());
 	}
 
 	@Test
@@ -181,7 +181,7 @@ public class CustomerServiceTest {
 		customer.setFirstName("Caio");
 		customer.setLastName("Amaral");
 
-		Response response = customerService.create(customer);
+		Response response = customerResource.create(customer);
 		Customer created = response.readEntity(Customer.class);
 
 		Integer id = created.getId();
@@ -190,13 +190,13 @@ public class CustomerServiceTest {
 
 		created.setId(id + 100);
 		created.setFirstName("Kyle");
-		Customer updated = customerService.update(id, created);
+		Customer updated = customerResource.update(id, created);
 
 		Assert.assertEquals(id, updated.getId());
 		Assert.assertEquals("Kyle", updated.getFirstName());
 		Assert.assertEquals("Amaral", updated.getLastName());
 
-		Customer found = customerService.retrieve(id);
+		Customer found = customerResource.retrieve(id);
 
 		Assert.assertEquals(id, found.getId());
 		Assert.assertEquals("Kyle", found.getFirstName());
@@ -208,7 +208,7 @@ public class CustomerServiceTest {
 		Customer customer = new Customer();
 		customer.setFirstName("Caio");
 		customer.setLastName("Amaral");
-		Response response = customerService.create(customer);
+		Response response = customerResource.create(customer);
 
 		final Integer id = response.readEntity(Customer.class).getId();
 
@@ -216,11 +216,11 @@ public class CustomerServiceTest {
 		for (int i = 0; i < 5; i++) {
 			lastName += i;
 			customer.setLastName(lastName);
-			response = customerService.create(customer);
+			response = customerResource.create(customer);
 			response.readEntity(Customer.class);
 		}
 
-		CustomerDuplicates duplicates = customerService.retrieveDuplicates(id);
+		CustomerDuplicates duplicates = customerResource.retrieveDuplicates(id);
 
 		Assert.assertEquals(5, duplicates.getDuplicates().size());
 
@@ -232,7 +232,7 @@ public class CustomerServiceTest {
 
 	@Test
 	public void testCreateIndex() {
-		final Response response = customerService.createIndex(false);
+		final Response response = customerResource.createIndex(false);
 		Assert.assertEquals(202, response.getStatus());
 
 		final CustomerDuplicatesIndex duplicatesIndex = response
@@ -253,7 +253,7 @@ public class CustomerServiceTest {
 			createCustomer("Caio", lastName);
 		}
 
-		Response response = customerService.createIndex(true);
+		Response response = customerResource.createIndex(true);
 		Assert.assertEquals(202, response.getStatus());
 
 		final CustomerDuplicatesIndex duplicatesIndex = response
@@ -263,7 +263,7 @@ public class CustomerServiceTest {
 		Assert.assertEquals(Integer.valueOf(10), duplicatesIndex.getCount());
 		Assert.assertEquals(IndexStatus.FINISHED, duplicatesIndex.getStatus());
 
-		DomainPage<CustomerDuplicates> duplicates = customerService
+		DomainPage<CustomerDuplicates> duplicates = customerResource
 				.retrieveDuplicates(0, 10);
 
 		Assert.assertEquals(0, duplicates.getPage().intValue());
@@ -285,10 +285,10 @@ public class CustomerServiceTest {
 		createCustomer("Jose", "Silva");
 		createCustomer("amaral", "Jovem");
 
-		Response response = customerService.createIndex(true);
+		Response response = customerResource.createIndex(true);
 		response.close();
 
-		DomainPage<CustomerDuplicates> duplicates = customerService
+		DomainPage<CustomerDuplicates> duplicates = customerResource
 				.retrieveDuplicates(0, 10);
 
 		Assert.assertEquals(0, duplicates.getPage().intValue());
@@ -311,7 +311,7 @@ public class CustomerServiceTest {
 		customer.setFirstName(firstName);
 		customer.setLastName(lastName);
 
-		Response response = customerService.create(customer);
+		Response response = customerResource.create(customer);
 		response.close();
 	}
 }
@@ -319,7 +319,7 @@ public class CustomerServiceTest {
 @Path("customers")
 @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-interface CustomerServiceApi {
+interface CustomerResourceApi {
 
 	@POST
 	public Response create(final Customer customer);
