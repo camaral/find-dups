@@ -143,7 +143,7 @@ public class CustomerServiceTest {
 		Assert.assertEquals("Amaral", found.getLastName());
 	}
 
-	@Test
+	@Test(expected = NotFoundException.class)
 	public void testDelete() {
 		Customer customer = new Customer();
 		customer.setFirstName("Caio");
@@ -162,32 +162,17 @@ public class CustomerServiceTest {
 		Assert.assertEquals("Caio", deleted.getFirstName());
 		Assert.assertEquals("Amaral", deleted.getLastName());
 
-		try {
-			customerService.delete(id);
-			Assert.fail("Should have thrown NotFoundException");
-		} catch (NotFoundException ex) {
-			// OK
-		}
+		customerService.delete(id);
 	}
 
-	@Test
+	@Test(expected = NotFoundException.class)
 	public void testRetrieveNotFound() {
-		try {
-			customerService.retrieve(-10);
-			Assert.fail("Should have thrown NotFoundException");
-		} catch (NotFoundException ex) {
-			// OK
-		}
+		customerService.retrieve(-10);
 	}
 
-	@Test
+	@Test(expected = NotFoundException.class)
 	public void testUpdateNotFound() {
-		try {
-			customerService.update(-10, new Customer());
-			Assert.fail("Should have thrown NotFoundException");
-		} catch (NotFoundException ex) {
-			// OK
-		}
+		customerService.update(-10, new Customer());
 	}
 
 	@Test
