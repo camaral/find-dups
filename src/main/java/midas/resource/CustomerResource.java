@@ -52,14 +52,14 @@ import org.springframework.stereotype.Component;
 public class CustomerResource {
 
 	@Autowired
-	private CustomerService customerController;
+	private CustomerService customerService;
 
 	@Autowired
-	private CustomerDuplicatesService customerDuplicatesController;
+	private CustomerDuplicatesService customerDuplicatesService;
 
 	@POST
 	public Response create(final Customer customer) throws URISyntaxException {
-		final Customer created = customerController.create(customer);
+		final Customer created = customerService.create(customer);
 
 		return Response.created(new URI("/customers/" + created.getId()))
 				.entity(created).build();
@@ -68,25 +68,25 @@ public class CustomerResource {
 	@GET
 	@Path("{id}")
 	public Customer retrieve(@PathParam("id") final Integer id) {
-		return customerController.retrieve(id);
+		return customerService.retrieve(id);
 	}
 
 	@PUT
 	@Path("{id}")
 	public Customer update(@PathParam("id") final Integer id,
 			final Customer customer) {
-		return customerController.update(id, customer);
+		return customerService.update(id, customer);
 	}
 
 	@DELETE
 	@Path("{id}")
 	public Customer delete(@PathParam("id") final Integer id) {
-		return customerController.delete(id);
+		return customerService.delete(id);
 	}
 
 	@DELETE
 	public Response deleteAll() {
-		customerController.deleteAll();
+		customerService.deleteAll();
 		return Response.ok().build();
 	}
 
@@ -94,7 +94,7 @@ public class CustomerResource {
 	@Path("{id}/duplicates")
 	public CustomerDuplicates retrieveDuplicates(
 			@PathParam("id") final Integer id) {
-		return customerDuplicatesController.retrieveDuplicates(id);
+		return customerDuplicatesService.retrieveDuplicates(id);
 	}
 
 	@GET
@@ -102,14 +102,14 @@ public class CustomerResource {
 	public DomainPage<CustomerDuplicates> retrieveDuplicates(
 			@QueryParam("page") final Integer page,
 			@QueryParam("count") final Integer count) {
-		return customerDuplicatesController.retrieveDuplicates(page, count);
+		return customerDuplicatesService.retrieveDuplicates(page, count);
 	}
 
 	@POST
 	@Path("/duplicates/index")
 	public Response createIndex(
 			@QueryParam("sync") @DefaultValue("false") final Boolean sync) {
-		final CustomerDuplicatesIndex indexDuplicates = customerDuplicatesController
+		final CustomerDuplicatesIndex indexDuplicates = customerDuplicatesService
 				.indexDuplicates(sync);
 		return Response.accepted(indexDuplicates).build();
 	}
