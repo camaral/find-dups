@@ -15,11 +15,10 @@ What is used in the implementation
 - **ActiveMQ:** To provide queues for asynchronous processing. This way we can scale the batch processing.
 - **Solr:** The main part of the de-duplication. Provides lots of searching features and can be configured to achieve the desired precision. It also can scale.
 
-I configured both Derby and ActiveMQ embedded to simplify the project testing and development. Solr was not embedded because it is to big to keep inside the project.
+I configured both Derby and ActiveMQ embedded to simplify the project testing and development. Solr was not embedded because it is too big to keep inside the project.
 
 
 ##Starting the engine
-Sadly I am using Windows here, let me know in case of any problems with these steps.
 
 ###Starting solr
 - Download it from http://www.apache.org/dyn/closer.cgi/lucene/solr/5.0.0
