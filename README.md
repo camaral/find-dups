@@ -30,7 +30,7 @@ $ ./bin/solr create -c customer;
 ```
  
 ###Executing find-dups
-- Clone the repo or download the zip from https://github.com/camaral1/find-dups. Put it inside ~/find-dups/ (or any other path) and start the application.
+- Clone the repo or download the zip from https://github.com/camaral/find-dups. Put it inside ~/find-dups/ (or any other path) and start the application.
 ```bash
 $ cd ~/find-dups
 $ mvn jetty:run
